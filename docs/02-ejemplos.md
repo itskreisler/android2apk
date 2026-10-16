@@ -16,7 +16,8 @@ Seis proyectos (en `examples/`), de menos a más.
 ./build-compose.sh examples/compose
 ```
 
-El APK sale en `<proyecto>/build/app.apk`, firmado.
+El APK sale en `<proyecto>/build/app.apk`, firmado, además de una copia con nombre descriptivo
+`<nombre>-<versión>-<abi>.apk` (el `<nombre>` viene de `name=` en `app.properties`).
 
 ---
 

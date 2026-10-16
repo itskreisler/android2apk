@@ -41,6 +41,11 @@ Hay dos caminos, cada uno con su **setup** y su **build**:
 ./build-compose.sh examples/compose   # → examples/compose/build/app.apk
 ```
 
+Cada compilación deja `build/app.apk` **y** una copia con nombre descriptivo
+`<nombre>-<versión>-<abi>.apk` (p. ej. `Tareas-1.0-universal.apk`, `Compose-1.0-arm64-v8a.apk`).
+El `<nombre>` sale de `name=` en `app.properties` (si falta, la carpeta del proyecto); `<abi>` es
+`universal` cuando el APK no lleva código nativo.
+
 Los proyectos de ejemplo viven en **`examples/`**.
 
 Desde cero (Android → Alpine → opencode → primer APK):

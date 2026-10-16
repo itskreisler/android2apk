@@ -6,8 +6,8 @@
 #   <project>/java/**.java
 #   <project>/res/...               (optional)
 #   <project>/assets/...            (optional)
-#   <project>/app.properties        (optional: versionCode=1, versionName=1.0, minSdk=26)
-# Output: <project>/build/app.apk
+#   <project>/app.properties        (optional: versionCode=1, versionName=1.0, minSdk=26, name=MiApp)
+# Output: <project>/build/app.apk  (+ <name>-<version>-<abi>.apk)
 #
 # Adapted from buddy-android (Apache-2.0): https://github.com/ghorbelhamdi/buddy-android
 set -euo pipefail
@@ -144,4 +144,24 @@ fi
 apksigner sign --ks "$KEYDIR/apps.jks" --ks-key-alias apps --ks-pass "file:$KEYDIR/password" \
   --out "$OUT/app.apk" "$OUT/aligned.apk"
 apksigner verify "$OUT/app.apk"
-echo "Built $OUT/app.apk"
+
+# Copia con nombre descriptivo:  <nombre>-<versionName>-<abi>.apk
+#   nombre: app.properties (name=MiApp) > variable APK_NAME > carpeta del proyecto
+#   abi:    arquitecturas empaquetadas (lib/<abi>/), o "universal" sin código nativo
+APK_NAME=${APK_NAME:-$(prop name)}
+APK_NAME=${APK_NAME:-$(basename "$P")}
+APK_NAME=$(printf '%s' "$APK_NAME" | tr ' ' '-' | tr -cd 'A-Za-z0-9._-')
+VNAME_TAG=$(printf '%s' "$VNAME" | tr -cd 'A-Za-z0-9._-')
+ABIS=""
+if [ -n "$JNI_DIR" ]; then
+  ABIS=$(find "$JNI_DIR" -mindepth 1 -maxdepth 1 -type d |
+    sed 's#.*/##' | LC_ALL=C sort | tr '\n' '_' | sed 's/_$//')
+fi
+case "$ABIS" in
+  "" | arm64-v8a_armeabi-v7a_x86_x86_64) ABI_TAG=universal ;;
+  *) ABI_TAG=$ABIS ;;
+esac
+APK_FILE="$APK_NAME-$VNAME_TAG-$ABI_TAG.apk"
+ln -f "$OUT/app.apk" "$OUT/$APK_FILE" 2>/dev/null || cp -f "$OUT/app.apk" "$OUT/$APK_FILE"
+echo "Built $OUT/$APK_FILE"
+echo "      $OUT/app.apk  (ruta estable)"

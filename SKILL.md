@@ -71,7 +71,9 @@ Rules that avoid the usual failures:
 bash $SKILL_DIR/build-apk.sh <app-dir>
 ```
 
-Produces `<app-dir>/build/app.apk` (signed with `~/.buddy/keys/apps.jks`, created on first build).
+Produces `<app-dir>/build/app.apk` plus a descriptive copy `<name>-<version>-<abi>.apk` (e.g.
+`Tareas-1.0-universal.apk`), signed with `~/.buddy/keys/apps.jks` (created on first build). Set
+`name=MiApp` in `app.properties` to control `<name>`; `<abi>` is `universal` without native code.
 If compilation fails, read the error, fix the Java, and build again. Each update must bump
 `versionCode` in `app.properties`.
 
