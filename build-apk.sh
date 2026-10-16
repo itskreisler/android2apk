@@ -42,12 +42,29 @@ aapt2 link -I "$SDK_JAR" --manifest "$P/AndroidManifest.xml" \
   --version-code "$VCODE" --version-name "$VNAME" \
   "${ASSETS[@]}" --java "$OUT/gen" -o "$OUT/base.apk" "${RES[@]}"
 
-echo "2/5 Java"
-javac --release 8 -classpath "$SDK_JAR" -Xlint:-options -encoding UTF-8 -nowarn \
-  -d "$OUT/classes" $(find "$P/java" "$OUT/gen" -name '*.java')
+echo "2/5 Java + Kotlin"
+KFILES=$(find "$P/java" -name '*.kt' 2>/dev/null || true)
+JFILES=$(find "$P/java" "$OUT/gen" -name '*.java' 2>/dev/null || true)
+if [ -n "$KFILES" ]; then
+  command -v kotlinc >/dev/null || { echo "kotlinc missing for .kt files. Run setup-kotlin.sh first." >&2; exit 1; }
+  # shellcheck disable=SC2086
+  kotlinc -classpath "$SDK_JAR" -jvm-target 1.8 -nowarn -d "$OUT/classes" $KFILES
+fi
+if [ -n "$JFILES" ]; then
+  # shellcheck disable=SC2086
+  javac --release 8 -classpath "$SDK_JAR:$OUT/classes" -Xlint:-options -encoding UTF-8 -nowarn \
+    -d "$OUT/classes" $JFILES
+fi
 
 echo "3/5 Dex"
-d8 --release --min-api "$MINSDK" --lib "$SDK_JAR" --output "$OUT/dex" $(find "$OUT/classes" -name '*.class')
+DEX_IN=$(find "$OUT/classes" -name '*.class')
+if [ -n "$KFILES" ]; then
+  KOTLIN_STDLIB=${KOTLIN_STDLIB:-$HOME/kotlin/kotlinc/lib/kotlin-stdlib.jar}
+  [ -f "$KOTLIN_STDLIB" ] || { echo "kotlin-stdlib.jar missing. Run setup-kotlin.sh first." >&2; exit 1; }
+  DEX_IN="$DEX_IN $KOTLIN_STDLIB"
+fi
+# shellcheck disable=SC2086
+d8 --release --min-api "$MINSDK" --lib "$SDK_JAR" --output "$OUT/dex" $DEX_IN
 
 echo "4/5 Package"
 python3 - "$OUT/base.apk" "$OUT/dex/classes.dex" "$OUT/aligned.apk" <<'EOF'

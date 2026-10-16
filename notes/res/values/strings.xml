@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Notas</string>
+    <string name="add">Nueva nota</string>
+    <string name="hint_title">Título</string>
+    <string name="hint_body">Escribe una nota…</string>
+    <string name="save">Guardar</string>
+    <string name="delete">Eliminar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete_confirm">¿Eliminar esta nota?</string>
+    <string name="empty">Sin notas\nToca + para crear una</string>
+</resources>
