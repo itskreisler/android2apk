@@ -60,7 +60,7 @@ Es **idempotente**: si ya está todo, termina en segundos.
 Un proyecto mínimo es una carpeta con tres cosas:
 
 ```
-hello/
+examples/hello/
   AndroidManifest.xml      package="com.buddyapps.hello"
   java/com/buddyapps/hello/MainActivity.java
   app.properties           versionCode=1  versionName=1.0  minSdk=26
@@ -90,8 +90,8 @@ clave.
 Verificar:
 
 ```sh
-aapt2 dump badging hello/build/app.apk | head -6
-apksigner verify --verbose hello/build/app.apk
+aapt2 dump badging examples/hello/build/app.apk | head -6
+apksigner verify --verbose examples/hello/build/app.apk
 # Verified using v2 scheme …: true
 # Verified using v3 scheme …: true
 ```
@@ -102,7 +102,7 @@ apksigner verify --verbose hello/build/app.apk
 
 ```sh
 ./setup-toolchain.sh
-./build.sh hello        # toolchain + build en un paso
+./build.sh examples/hello   # toolchain + build en un paso
 ```
 
 Sigue en **[02-ejemplos.md](02-ejemplos.md)**.
@@ -113,7 +113,7 @@ Aquí no hay Android: el APK es solo un archivo. Para instalarlo, cópialo al te
 localmente y deja que Buddy lo instale con su herramienta `install_apk`:
 
 ```sh
-python3 -m http.server 8080 --directory hello/build
+python3 -m http.server 8080 --directory examples/hello/build
 # luego pídele a Buddy: install_apk http://127.0.0.1:8080/app.apk
 ```
 

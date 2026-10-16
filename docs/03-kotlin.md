@@ -28,7 +28,7 @@ El paso 2 de `build-apk.sh` ahora se llama `2/5 Java + Kotlin`:
 3. En el paso `3/5 Dex`, añade `kotlin-stdlib.jar` junto a las clases de la app al invocar `d8`.
 
 Además, `build.sh` ejecuta `setup-kotlin.sh` automáticamente si el proyecto tiene algún `.kt`, así
-que `./build.sh khello` funciona sin pasos previos.
+que `./build.sh examples/khello` funciona sin pasos previos.
 
 ## La versión de Kotlin importa (metadata vs. `d8`)
 
@@ -51,7 +51,7 @@ Puedes cambiarla con `KOTLIN_VERSION=… ./setup-kotlin.sh` si algún día tiene
 ## Ejemplo `khello`
 
 ```
-khello/
+examples/khello/
   AndroidManifest.xml
   java/com/buddyapps/khello/MainActivity.kt
   app.properties
@@ -79,16 +79,16 @@ class MainActivity : Activity() {
 ```
 
 ```sh
-./build.sh khello
+./build.sh examples/khello
 # 1/5 Resources
 # 2/5 Java + Kotlin
 # 3/5 Dex
 # 4/5 Package
 # 5/5 Sign
-# Built /root/android2apk/khello/build/app.apk
+# Built /root/android2apk/examples/khello/build/app.apk
 
-apksigner verify khello/build/app.apk && echo OK
-unzip -p khello/build/app.apk classes.dex | strings | grep -E "buddyapps/khello/MainActivity|kotlin/jvm/internal/Intrinsics"
+apksigner verify examples/khello/build/app.apk && echo OK
+unzip -p examples/khello/build/app.apk classes.dex | strings | grep -E "buddyapps/khello/MainActivity|kotlin/jvm/internal/Intrinsics"
 ```
 
 Nota: el APK de Kotlin pesa bastante más (~640 KB frente a ~10 KB del de Java) porque incluye

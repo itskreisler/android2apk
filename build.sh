@@ -1,6 +1,6 @@
 #!/bin/bash
 # One-shot: ensure the toolchain, then build a project.
-#   ./build.sh <project-dir>      e.g. ./build.sh hello
+#   ./build.sh <project-dir>      e.g. ./build.sh examples/hello
 set -euo pipefail
 cd "$(dirname "$0")"
 P="${1:?usage: ./build.sh <project-dir>}"
