@@ -33,7 +33,9 @@ Downloads the Kotlin compiler (~90 MB) and exposes `kotlinc` + `kotlin-stdlib.ja
 
 ## 2. Project layout
 
-Create one folder per app:
+Create one folder per app. Ready-made projects live in **`examples/`** — copy one as a starting
+point: `hello` (Java mínimo), `pulse` (icono + `res/`), `notes` (app completa con layouts XML),
+`todo` (lista de tareas con la UI en código), `khello` (Kotlin).
 
 ```
 AndroidManifest.xml      <manifest package="com.buddyapps.<name>"> … one launcher <activity>

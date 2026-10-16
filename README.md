@@ -23,8 +23,10 @@ aligned.apk ──apksigner──▶ app.apk ✅
 
 ```sh
 ./setup-toolchain.sh     # una vez: JDK, aapt2, d8, apksigner, android.jar (~400 MB)
-./build.sh hello         # compila y firma → hello/build/app.apk
+./build.sh examples/hello    # compila y firma → examples/hello/build/app.apk
 ```
+
+Los proyectos de ejemplo viven en **`examples/`**.
 
 Desde cero (Android → Alpine → opencode → primer APK):
 **[docs/01-camino-simple.md](docs/01-camino-simple.md)**.
@@ -34,7 +36,7 @@ Desde cero (Android → Alpine → opencode → primer APK):
 | Doc | Contenido |
 |---|---|
 | [docs/01-camino-simple.md](docs/01-camino-simple.md) | Montar Alpine desde Android (proot-distro), `apk add`, opencode y el primer APK |
-| [docs/02-ejemplos.md](docs/02-ejemplos.md) | Los ejemplos del repo: `hello`, `pulse`, `notes`, `khello` |
+| [docs/02-ejemplos.md](docs/02-ejemplos.md) | Los ejemplos (en `examples/`): `hello`, `pulse`, `notes`, `todo`, `khello` |
 | [docs/03-kotlin.md](docs/03-kotlin.md) | Añadir Kotlin sin Gradle (etapa 1) |
 | [docs/04-compose.md](docs/04-compose.md) | Jetpack Compose / Material 3 Expressive: qué haría falta |
 
@@ -52,6 +54,9 @@ Desde cero (Android → Alpine → opencode → primer APK):
   (Kotlin necesita `./setup-kotlin.sh` una vez; AndroidX/Compose es una etapa posterior.)
 - Sube `versionCode` en `app.properties` en cada actualización.
 
+Estas reglas (paquete `com.buddyapps.*`, `android:exported`, tema del sistema, sin AndroidX salvo
+Compose) las comprueba **`./lint.sh`**.
+
 ## Scripts
 
 | Archivo | Qué hace |
@@ -60,6 +65,8 @@ Desde cero (Android → Alpine → opencode → primer APK):
 | `setup-kotlin.sh` | Instala el compilador de Kotlin + `kotlin-stdlib.jar` (solo proyectos Kotlin) |
 | `build-apk.sh <proyecto>` | Compila y firma `<proyecto>/build/app.apk` (Java y/o Kotlin) |
 | `build.sh <proyecto>` | Toolchain + build en un solo comando |
+| `check-compose-plugin.sh` | Verifica que el plugin de Compose compila `@Composable` (etapa 2) |
+| `lint.sh` | Valida scripts (`shellcheck`), XML (`xmllint`) y las reglas de los proyectos |
 | `SKILL.md` | La *skill* de agente: cómo crear/compilar/instalar una app con este repo |
 
 Scripts y `SKILL.md` adaptados de **buddy-android** (Apache-2.0):

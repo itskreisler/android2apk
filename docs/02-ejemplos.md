@@ -1,6 +1,6 @@
 # 02 · Ejemplos del repo
 
-Cuatro proyectos, de menos a más. Compila cualquiera así:
+Cinco proyectos (en `examples/`), de menos a más. Compila cualquiera así:
 
 ```sh
 ./build.sh <proyecto>          # toolchain + build (recomendado)
@@ -15,15 +15,15 @@ El APK sale en `<proyecto>/build/app.apk`, firmado.
 ## `hello` — lo mínimo (Java, UI en código)
 
 ```
-hello/
+examples/hello/
   AndroidManifest.xml                 package="com.buddyapps.hello"
   java/com/buddyapps/hello/MainActivity.java
   app.properties                      versionCode=1 versionName=1.0 minSdk=26
 ```
 
 ```sh
-./build.sh hello
-aapt2 dump badging hello/build/app.apk | grep -E "package:|launchable"
+./build.sh examples/hello
+aapt2 dump badging examples/hello/build/app.apk | grep -E "package:|launchable"
 ```
 
 ```
@@ -40,7 +40,7 @@ Sin `res/`: la UI se construye en Java (`TextView`, `LinearLayout`…).
 Añade un árbol `res/`, así que `aapt2 compile` corre y el lanzador recibe **su propio icono**:
 
 ```
-pulse/
+examples/pulse/
   AndroidManifest.xml                 package="com.buddyapps.pulse"
   res/drawable/ic_launcher.xml        icono vectorial único (108dp)
   res/layout/activity_main.xml        layout XML real
@@ -50,8 +50,8 @@ pulse/
 ```
 
 ```sh
-./build.sh pulse
-aapt2 dump badging pulse/build/app.apk | grep -E "application:|package:"
+./build.sh examples/pulse
+aapt2 dump badging examples/pulse/build/app.apk | grep -E "application:|package:"
 ```
 
 ```
@@ -73,7 +73,7 @@ App completa: rejilla **tipo Google Keep** de tarjetas de colores, editor **tipo
 persistencia en JSON. Sin AndroidX ni base de datos: solo Views y `org.json`.
 
 ```
-notes/
+examples/notes/
   AndroidManifest.xml                 dos activities, tema Light
   res/drawable/ic_launcher.xml        su icono
   res/drawable/ic_add.xml             el glifo + del FAB
@@ -90,8 +90,8 @@ notes/
 ```
 
 ```sh
-./build.sh notes
-aapt2 dump badging notes/build/app.apk | grep -E "application:|launchable"
+./build.sh examples/notes
+aapt2 dump badging examples/notes/build/app.apk | grep -E "application:|launchable"
 ```
 
 ```
@@ -112,12 +112,38 @@ Cómo funciona:
 
 ---
 
+## `todo` — lista de tareas Keep + Notion (Java, **UI en código**)
+
+La misma idea que `notes`, pero montada **exactamente como lo hace el repo original**: Java plano y
+**toda la interfaz en código** (sin `res/layout`), con lo mínimo imprescindible.
+
+```
+examples/todo/
+  AndroidManifest.xml                       package="com.buddyapps.todo" (label "Tareas")
+  java/com/buddyapps/todo/MainActivity.java la app entera en un archivo
+  app.properties
+```
+
+```sh
+./build.sh examples/todo
+aapt2 dump badging examples/todo/build/app.apk | grep -E "application:|launchable"
+```
+
+- **Keep** — rejilla de dos columnas con tarjetas de colores (`GradientDrawable`), las nuevas arriba.
+- **Notion** — título grande, fondo claro y estado "Hecho/Pendiente".
+- **Uso** — escribe y pulsa *Añadir*; toca una tarjeta para marcarla; mantén pulsado para borrarla.
+- **Persistencia** — `filesDir/tasks.json` con `org.json`.
+- **Sin `res/`** — icono del sistema y todo definido en código: el APK no lleva recursos, así que el
+  paso `1/5 Resources` se salta (como en `hello`). Es el ejemplo más "puro" del camino simple.
+
+---
+
 ## `khello` — Kotlin (etapa 1, sin Compose)
 
 El mismo *hello world* pero en **Kotlin**, demostrando que los `.kt` compilan sin Gradle:
 
 ```
-khello/
+examples/khello/
   AndroidManifest.xml
   java/com/buddyapps/khello/MainActivity.kt
   app.properties
@@ -125,7 +151,7 @@ khello/
 
 ```sh
 ./setup-kotlin.sh          # una vez: compilador de Kotlin (~90 MB)
-./build.sh khello
+./build.sh examples/khello
 ```
 
 `build-apk.sh` compila los `.kt` con `kotlinc` (`-jvm-target 1.8`) y en el paso de dex añade
