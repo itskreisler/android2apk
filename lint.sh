@@ -14,7 +14,8 @@ say() { printf '\n== %s ==\n' "$1"; }
 # --- 1) Scripts: shellcheck (el "eslint" de bash) --------------------------------
 say "shellcheck (scripts .sh)"
 if command -v shellcheck >/dev/null 2>&1; then
-  if shellcheck build.sh build-apk.sh setup-toolchain.sh setup-kotlin.sh \
+  if shellcheck build.sh build-apk.sh build-compose.sh \
+      setup-toolchain.sh setup-kotlin.sh setup-compose.sh \
       check-compose-plugin.sh lint.sh; then
     echo "OK: sin avisos"
   else
@@ -22,6 +23,19 @@ if command -v shellcheck >/dev/null 2>&1; then
   fi
 else
   echo "omitido (instala con: apk add shellcheck)"
+fi
+
+# --- 1b) Python: sintaxis de las herramientas -------------------------------------
+say "python (tools/*.py)"
+if command -v python3 >/dev/null 2>&1; then
+  pyok=1
+  for f in tools/*.py; do
+    [ -f "$f" ] || continue
+    python3 -c 'import ast, sys; ast.parse(open(sys.argv[1]).read())' "$f" || pyok=0
+  done
+  [ "$pyok" = 1 ] && echo "OK: sintaxis válida" || fail=1
+else
+  echo "omitido (falta python3)"
 fi
 
 # --- 2) XML: xmllint (manifest, layouts, drawables…) -----------------------------

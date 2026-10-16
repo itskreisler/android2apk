@@ -20,6 +20,11 @@ prop() { [ -f "$P/app.properties" ] && sed -n "s/^$1=//p" "$P/app.properties" | 
 VCODE=$(prop versionCode); VCODE=${VCODE:-1}
 VNAME=$(prop versionName); VNAME=${VNAME:-1.0}
 MINSDK=$(prop minSdk); MINSDK=${MINSDK:-26}
+COMPOSE=$(prop compose); COMPOSE=${COMPOSE:-false}
+LIBS=${COMPOSE_LIBS:-$HOME/compose-libs}
+COMPOSE_PLUGIN=${COMPOSE_PLUGIN:-$HOME/kotlin/kotlinc/lib/compose-compiler-plugin.jar}
+# AndroidX Compose se publica con JVM target 11 (inline de bytecode); el resto, 8.
+JVM_TARGET=$(prop jvmTarget); JVM_TARGET=${JVM_TARGET:-$([ "$COMPOSE" = true ] && echo 11 || echo 8)}
 
 [ -f "$SDK_JAR" ] || { echo "android.jar missing at $SDK_JAR. Run setup-toolchain.sh first." >&2; exit 1; }
 for t in javac d8 aapt2 apksigner keytool python3; do
@@ -35,24 +40,48 @@ if [ -d "$P/res" ] && [ -n "$(ls -A "$P/res")" ]; then
   aapt2 compile --dir "$P/res" -o "$OUT/res.zip"
   RES=("$OUT/res.zip")
 fi
+EXTRA=()
+if [ "$COMPOSE" = true ]; then
+  [ -f "$LIBS/lib-jars.txt" ] || { echo "Faltan las librerías de Compose. Corre ./setup-compose.sh." >&2; exit 1; }
+  i=0
+  while IFS= read -r rdir; do
+    [ -n "$rdir" ] || continue
+    aapt2 compile --dir "$rdir" -o "$OUT/libres-$i.zip"
+    RES+=("$OUT/libres-$i.zip")
+    i=$((i + 1))
+  done < "$LIBS/res-dirs.txt"
+  # Cada librería referencia su propio R$... ; aapt2 genera esas R con --extra-packages.
+  while IFS= read -r pkg; do
+    [ -n "$pkg" ] && EXTRA+=(--extra-packages "$pkg")
+  done < "$LIBS/packages.txt"
+fi
 ASSETS=()
 [ -d "$P/assets" ] && ASSETS=(-A "$P/assets")
 aapt2 link -I "$SDK_JAR" --manifest "$P/AndroidManifest.xml" \
   --min-sdk-version "$MINSDK" --target-sdk-version 36 \
   --version-code "$VCODE" --version-name "$VNAME" \
-  "${ASSETS[@]}" --java "$OUT/gen" -o "$OUT/base.apk" "${RES[@]}"
+  "${ASSETS[@]}" --java "$OUT/gen" -o "$OUT/base.apk" "${RES[@]}" "${EXTRA[@]}"
 
 echo "2/5 Java + Kotlin"
+CP="$SDK_JAR:$OUT/classes"
+if [ "$COMPOSE" = true ]; then
+  CP="$CP:$(tr '\n' ':' < "$LIBS/lib-jars.txt")"
+fi
 KFILES=$(find "$P/java" -name '*.kt' 2>/dev/null || true)
 JFILES=$(find "$P/java" "$OUT/gen" -name '*.java' 2>/dev/null || true)
 if [ -n "$KFILES" ]; then
   command -v kotlinc >/dev/null || { echo "kotlinc missing for .kt files. Run setup-kotlin.sh first." >&2; exit 1; }
+  KPLUGIN=()
+  if [ "$COMPOSE" = true ]; then
+    [ -f "$COMPOSE_PLUGIN" ] || { echo "Falta el plugin de Compose ($COMPOSE_PLUGIN). Corre ./setup-kotlin.sh." >&2; exit 1; }
+    KPLUGIN=(-Xplugin="$COMPOSE_PLUGIN")
+  fi
   # shellcheck disable=SC2086
-  kotlinc -classpath "$SDK_JAR" -jvm-target 1.8 -nowarn -d "$OUT/classes" $KFILES
+  kotlinc -classpath "$CP" "${KPLUGIN[@]}" -jvm-target "$JVM_TARGET" -nowarn -d "$OUT/classes" $KFILES
 fi
 if [ -n "$JFILES" ]; then
   # shellcheck disable=SC2086
-  javac --release 8 -classpath "$SDK_JAR:$OUT/classes" -Xlint:-options -encoding UTF-8 -nowarn \
+  javac --release "$JVM_TARGET" -classpath "$CP" -Xlint:-options -encoding UTF-8 -nowarn \
     -d "$OUT/classes" $JFILES
 fi
 
@@ -63,17 +92,37 @@ if [ -n "$KFILES" ]; then
   [ -f "$KOTLIN_STDLIB" ] || { echo "kotlin-stdlib.jar missing. Run setup-kotlin.sh first." >&2; exit 1; }
   DEX_IN="$DEX_IN $KOTLIN_STDLIB"
 fi
+if [ "$COMPOSE" = true ]; then
+  DEX_IN="$DEX_IN $(tr '\n' ' ' < "$LIBS/lib-jars.txt")"
+fi
 # shellcheck disable=SC2086
 d8 --release --min-api "$MINSDK" --lib "$SDK_JAR" --output "$OUT/dex" $DEX_IN
 
 echo "4/5 Package"
-python3 - "$OUT/base.apk" "$OUT/dex/classes.dex" "$OUT/aligned.apk" <<'EOF'
-import sys, zipfile
-src, dex, dst = sys.argv[1:]
+JNI_DIR=""
+if [ "$COMPOSE" = true ] && [ -d "$LIBS/jni" ]; then
+  JNI_DIR=$LIBS/jni
+  echo "  nativos: $(find "$JNI_DIR" -name '*.so' | wc -l) .so ($(find "$JNI_DIR" -mindepth 1 -maxdepth 1 -type d | sed 's#.*/##' | tr '\n' ' '))"
+fi
+python3 - "$OUT/base.apk" "$OUT/dex/classes.dex" "$OUT/aligned.apk" "$JNI_DIR" <<'EOF'
+import sys, os, zipfile
+src, dex, dst, jni = sys.argv[1:5]
 with zipfile.ZipFile(src) as zin, zipfile.ZipFile(dst, "w") as zout:
     entries = [(i, zin.read(i.filename)) for i in zin.infolist()]
     entries.append((zipfile.ZipInfo("classes.dex"), open(dex, "rb").read()))
     entries[-1][0].compress_type = zipfile.ZIP_DEFLATED
+    if jni and os.path.isdir(jni):  # lib/<abi>/*.so venidos de las AAR
+        for abi in sorted(os.listdir(jni)):
+            adir = os.path.join(jni, abi)
+            if not os.path.isdir(adir):
+                continue
+            for fn in sorted(os.listdir(adir)):
+                if not fn.endswith(".so"):
+                    continue
+                data = open(os.path.join(adir, fn), "rb").read()
+                zi = zipfile.ZipInfo("lib/%s/%s" % (abi, fn))
+                zi.compress_type = zipfile.ZIP_DEFLATED
+                entries.append((zi, data))
     for info, data in entries:
         out = zipfile.ZipInfo(info.filename, date_time=info.date_time)
         out.compress_type = info.compress_type

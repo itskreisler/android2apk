@@ -10,42 +10,48 @@ import androidx.compose.runtime.Composable
 @Composable
 fun MiAppExpressiva(content: @Composable () -> Unit) {
     MaterialExpressiveTheme(
-        motionScheme = MotionScheme.expressive(), // Activa la física de movimiento expresiva
+        motionScheme = MotionScheme.expressive(), // física de movimiento expresiva
         content = content
     )
 }
 ```
 
-## Qué dice la documentación
+**Respuesta: sí.** Está compilado de verdad en [`examples/compose/`](../examples/compose/): Kotlin +
+AndroidX + Material 3, sin Gradle.
 
-- [`MaterialExpressiveTheme`](https://developer.android.com/reference/kotlin/androidx/compose/material3/MaterialExpressiveTheme.composable)
-  — `fun MaterialExpressiveTheme(colorScheme: ColorScheme? = null, motionScheme: MotionScheme? = null, shapes: Shapes? = null, typography: Typography? = null, content: @Composable () -> Unit)`.
-- [`MotionScheme.expressive()`](https://developer.android.com/reference/kotlin/androidx/compose/material3/MotionScheme)
-  — "Material's recommended motion scheme for prominent UI elements and hero interactions".
-- [Material 3 en Compose](https://developer.android.com/develop/ui/compose/designsystems/material3) ·
-  [paquete `androidx.compose.material3`](https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary).
+```sh
+./setup-compose.sh                    # una vez (toolchain + Kotlin + AAR de AndroidX)
+./build-compose.sh examples/compose   # → examples/compose/build/app.apk (~5,5 MB, firmado)
+```
 
-La referencia marca `MotionScheme` como "Añadido en **1.5.0-beta01**" (ahí pasó a estable), pero el
-artefacto **`material3-android:1.4.0` ya incluye** `MaterialExpressiveTheme` y `MotionScheme`
-(verificado abajo). Usamos 1.4.0.
+## Cómo se construye (dos scripts)
 
-## Diferencia entre Java y Compose
+1. **`setup-compose.sh`** — idempotente. Corre `setup-toolchain.sh` y `setup-kotlin.sh` y, después,
+   baja el *cierre* de dependencias de AndroidX listado en [`compose-deps.txt`](../compose-deps.txt) a
+   `~/compose-libs/`. De cada AAR extrae su `classes.jar` y su `res/`, **fusiona** los recursos y anota
+   el `package` de cada librería para generar su `R`.
+2. **`build-compose.sh <proyecto>`** — `setup-compose.sh` + `build-apk.sh`. El APK queda en
+   `<proyecto>/build/app.apk`.
+
+Si ya corriste el setup, basta con `./build-apk.sh examples/compose`.
+
+## Qué añade Compose al pipeline
 
 El pipeline normal compila `javac`/`kotlinc` con solo `android.jar`. Compose añade tres cosas:
 
 1. El **plugin compilador de Compose**, que reescribe las funciones `@Composable`.
-2. Las **librerías AndroidX** (runtime, ui, foundation, material3…), cada una una AAR con su `classes.jar`
-   **y su `res/`** (material3 ~175 entradas, ui ~176, foundation ~173 — casi todas `values-*`).
+2. Las **librerías AndroidX** (runtime, ui, foundation, material3…), cada una una AAR con su
+   `classes.jar` **y su `res/`** (casi todo traducciones `values-*`).
 3. **Dexear** todo eso junto con la app.
 
-## Etapas
+## Etapas (todas hechas)
 
 | Etapa | Estado |
 |---|---|
-| 1. Kotlin (`kotlinc` + stdlib → `d8`) | ✅ hecho — [03-kotlin.md](03-kotlin.md) |
-| 2. Plugin compilador de Compose | ✅ hecho (abajo) |
-| 3. Resolver AAR de AndroidX + fusionar recursos/manifest en `aapt2 link` | ⏳ en curso |
-| 4. Dexear Compose + AndroidX | ⏳ pendiente |
+| 1. Kotlin (`kotlinc` + stdlib → `d8`) | ✅ — [03-kotlin.md](03-kotlin.md) |
+| 2. Plugin compilador de Compose | ✅ — `check-compose-plugin.sh` |
+| 3. Resolver AAR de AndroidX + fusionar recursos en `aapt2 link` | ✅ — `setup-compose.sh` |
+| 4. Dexear Compose + AndroidX | ✅ — `build-apk.sh` (rama Compose) |
 
 ## Etapa 2 — el plugin de Compose (hecho)
 
@@ -71,40 +77,93 @@ OK: el plugin de Compose transformó @Composable (aparece Composer).
 Esa firma `(String, Composer, int)` es la prueba: el plugin insertó el `Composer` y la máscara
 `$changed`, es decir, la transformación de Compose ocurrió.
 
-## Etapa 3 — las librerías AndroidX (el muro)
+## Etapa 3 — las librerías AndroidX (hecho)
 
-Aquí está lo grande. Para compilar y ejecutar el snippet hacen falta las AAR de AndroidX **y toda su
-clausura transitiva**. `material3-android:1.4.0` declara, entre otras:
+`setup-compose.sh` resuelve el grafo sin Gradle:
+
+- **Versiones fijadas** en [`compose-deps.txt`](../compose-deps.txt): **88 dependencias** (69 `.aar` +
+  19 `.jar`). Raíces: `androidx.compose.material3:material3-android:1.5.0-beta01` y
+  `androidx.activity:activity-compose:1.8.2`; de ahí sale el tren **Compose 1.12.0**. El fichero se
+  regenera con [`tools/resolve-compose-deps.py`](../tools/resolve-compose-deps.py), que recorre los
+  POM de Maven.
+- **Descarga**: de Google Maven y, si falla, de Maven Central, con el patrón
+  `…/<grupo con / >/<artefacto>/<versión>/<artefacto>-<versión>.<aar|jar>`.
+- **Recursos**: se extrae el `res/` de cada AAR y se **fusiona** en `res-merged/`. Gana el primero que
+  define `(config, tipo, nombre)`; así se resuelven duplicados como `string/autofill`, presente a la
+  vez en `ui` y `foundation`. Después, `aapt2 compile` una sola vez y `aapt2 link` con
+  **`--extra-packages <package>`** por cada librería → genera su `R.java` y deja resolubles las
+  referencias del estilo `androidx/compose/material3/R$string.*`.
+- **Compilación**: `kotlinc -Xplugin=compose-compiler-plugin.jar` con **`-jvm-target 11`** (AndroidX se
+  publica con target 11).
+- **Dex**: `d8` con las clases de la app + `kotlin-stdlib` + los **74 `.jar`** de AndroidX (55 salen de
+  AAR con `classes.jar` real + 19 `.jar` directos; se saltan los *stubs* KMP vacíos).
+
+### Código nativo y ABI
+
+Por defecto **el APK no lleva código nativo** (todo es dex + recursos), así que es **universal**: corre
+en arm64-v8a, armeabi-v7a, x86 y x86_64. Una única AAR, `androidx.graphics:graphics-path`, trae `.so`
+(`libandroidx.graphics.path.so`); `ui-graphics` la usa **solo en Android < 14** (en Android 14+ tira de
+la API nativa del sistema). Nuestra app (Text/Button/Column) no la necesita.
+
+`NATIVE_ABIS` decide qué `.so` se empaquetan en `lib/<abi>/`:
+
+```sh
+NATIVE_ABIS=all        ./setup-compose.sh   # todas las ABIs (APK universal con nativos) [por defecto]
+NATIVE_ABIS=arm64-v8a  ./setup-compose.sh   # solo arm64 (el móvil típico)
+NATIVE_ABIS=           ./setup-compose.sh   # ninguna → APK 100% dex, universal
+```
+
+## Etapa 4 — dexear Compose + AndroidX (hecho)
+
+`build-apk.sh` detecta `compose=true` en `app.properties` y entonces:
+
+- compila con `kotlinc` (no `javac`) poniendo en el classpath los 74 `.jar` de `~/compose-libs/jars/`,
+- pasa `-Xplugin` y `-jvm-target 11`,
+- en `3/5 Dex` añade esas mismas jars a `d8`,
+- en `4/5 Package` añade `lib/<abi>/*.so` si `NATIVE_ABIS` los dejó preparados.
+
+Resultado medido:
 
 ```
-androidx.compose.runtime:runtime-android:1.9.0
-androidx.compose.ui:ui-android:1.8.2
-androidx.compose.ui:ui-text-android:1.8.2
-androidx.compose.ui:ui-util-android:1.8.2
-androidx.compose.foundation:foundation-android:1.8.1
-androidx.compose.foundation:foundation-layout-android:1.8.1
-androidx.compose.animation:animation-core-android:1.8.1
-androidx.compose.material:material-ripple-android:1.8.1
-androidx.activity:activity-compose:1.8.2
-androidx.lifecycle:lifecycle-common-java8:2.6.1
-androidx.collection:collection-jvm:1.5.0
-androidx.annotation:annotation-jvm / annotation-experimental
-…
+examples/compose/build/app.apk   5.578.584 bytes (~5,3 MiB)
+  classes.dex       ~14,7 MB en crudo
+  resources.arsc      500 KB
+package=com.buddyapps.compose   minSdk 26   targetSdk 36   (firmado)
 ```
 
-Y esas, a su vez, tiran de `lifecycle-*`, `core`, `savedstate`, `kotlinx-coroutines`, `profileinstaller`,
-`tracing`, `autofill`, `emoji2`… Resolver ese grafo con sus conflictos de versión es, literalmente,
-**el trabajo que hace Gradle**. Reimplementarlo a mano (un resolutor de POMs) es posible pero frágil.
+## Versiones: por qué `material3 1.5.0-beta01`
 
-Además:
+`MaterialExpressiveTheme` y `MotionScheme` **existen** en `material3 1.4.0`, pero están marcados
+`internal`: usarlos desde una app da `error: … it is internal in file` al compilar. Pasaron a
+**públicos en `1.5.0-beta01`**, la versión que fijamos. Comprobado: el snippet compila con `1.5.0-beta01`
+y falla con `1.4.0`.
 
-- **Recursos**: hay que fusionar el `res/` de cada AAR (casi todo traducciones `values-*`) y fijar los
-  IDs con `aapt2 link --stable-ids` (a partir de los `R.txt` de las AAR), porque el `classes.jar` de
-  cada librería ya trae sus IDs incrustados.
-- **Manifest**: fusionar el `<manifest>` de cada AAR (sobre todo `minSdk`).
+## Enlaces usados
 
-Nota honesta: aquí **no hay Android ni emulador**, así que aunque consigamos un APK de Compose firmado,
-solo podremos verificar que *compila, enlaza, dexa y firma*. No podemos probar en ejecución.
+Repositorios de artefactos:
+
+- Google Maven: <https://dl.google.com/dl/android/maven2/>
+- Maven Central: <https://repo1.maven.org/maven2/>
+
+Versiones y API:
+
+- [Releases de `compose-material3`](https://developer.android.com/jetpack/androidx/releases/compose-material3)
+- [`MaterialExpressiveTheme`](https://developer.android.com/reference/kotlin/androidx/compose/material3/MaterialExpressiveTheme.composable)
+- [`MotionScheme`](https://developer.android.com/reference/kotlin/androidx/compose/material3/MotionScheme)
+- [Material 3 en Compose](https://developer.android.com/develop/ui/compose/designsystems/material3)
+- [Mapeo de versiones del BOM de Compose](https://developer.android.com/develop/ui/compose/bom/bom-mapping)
+- [Releases de Kotlin](https://github.com/JetBrains/kotlin/releases) · [plugin de Compose](https://kotlinlang.org/docs/compose-compiler-migration-guide.html)
+
+Toolchain (los baja `setup-toolchain.sh`):
+
+- build-tools 36: <https://dl.google.com/android/repository/build-tools_r36_linux.zip>
+- plataforma 36: <https://dl.google.com/android/repository/platform-36_r02.zip>
+- base: [buddy-android](https://github.com/ghorbelhamdi/buddy-android) (Apache-2.0)
+
+## Límites
+
+Aquí **no hay Android ni emulador**: el APK de Compose se verifica solo hasta *compila, enlaza, dexa y
+firma* (`aapt2 dump badging`, `apksigner verify`). No se puede probar en ejecución.
 
 ## Alternativa si de verdad quieres Compose
 

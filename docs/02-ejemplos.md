@@ -1,11 +1,19 @@
 # 02 · Ejemplos del repo
 
-Cinco proyectos (en `examples/`), de menos a más. Compila cualquiera así:
+Seis proyectos (en `examples/`), de menos a más.
+
+**Simple** (Java o Kotlin, sin dependencias):
 
 ```sh
-./build.sh <proyecto>          # toolchain + build (recomendado)
-# o, si ya corriste ./setup-toolchain.sh una vez:
-./build-apk.sh <proyecto>
+./setup-toolchain.sh          # una vez (y ./setup-kotlin.sh si hay .kt)
+./build.sh <proyecto>         # compila y firma
+```
+
+**Con Compose** (etapa 3):
+
+```sh
+./setup-compose.sh            # una vez (toolchain + Kotlin + AndroidX)
+./build-compose.sh examples/compose
 ```
 
 El APK sale en `<proyecto>/build/app.apk`, firmado.
@@ -156,3 +164,36 @@ examples/khello/
 
 `build-apk.sh` compila los `.kt` con `kotlinc` (`-jvm-target 1.8`) y en el paso de dex añade
 `kotlin-stdlib.jar`. Es la **etapa 1** hacia Compose. Detalles en [03-kotlin.md](03-kotlin.md).
+
+---
+
+## `compose` — Jetpack Compose + Material 3 Expressive (etapa 3)
+
+El snippet `MaterialExpressiveTheme(motionScheme = MotionScheme.expressive())` de verdad: Kotlin +
+AndroidX, sin Gradle.
+
+```
+examples/compose/
+  AndroidManifest.xml                          package="com.buddyapps.compose" (label "Compose")
+  java/com/buddyapps/compose/MainActivity.kt   MaterialExpressiveTheme + un contador
+  app.properties                               compose=true
+```
+
+```sh
+./setup-compose.sh
+./build-compose.sh examples/compose
+aapt2 dump badging examples/compose/build/app.apk | grep -E "package:|native-code"
+```
+
+```
+package: name='com.buddyapps.compose' versionCode='1' versionName='1.0' … compileSdkVersion='36'
+# (sin native-code si no se incluyen las .so)
+```
+
+- **`compose=true`** en `app.properties` activa la rama Compose de `build-apk.sh`.
+- `setup-compose.sh` baja y prepara las AAR de AndroidX (~50 MB) en `~/compose-libs/`.
+- El APK pesa ~5,5 MB (el dex incluye Compose + AndroidX, y `resources.arsc` todas las traducciones).
+- **ABI**: sin código nativo el APK es universal. `NATIVE_ABIS` permite empaquetar las `.so` de
+  `graphics-path`: `all` (universal, por defecto), `arm64-v8a` (solo arm64), vacío (ninguna).
+
+Cómo se resuelve el grafo de AndroidX sin Gradle, paso a paso: [04-compose.md](04-compose.md).
