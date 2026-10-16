@@ -91,6 +91,68 @@ Verified using v3 scheme (APK Signature Scheme v3): true
 The signed APK is at `hello/build/app.apk`. The signing key is created on first build at
 `~/.buddy/keys/apps.jks` (RSA 2048). **Keep it**: updates must be signed with the same key.
 
+### 5. Example 2: `pulse` — custom icon + resources
+
+`pulse/` adds a `res/` tree, so `aapt2 compile` runs and the launcher gets its **own icon**:
+
+```
+pulse/
+  AndroidManifest.xml                 package="com.buddyapps.pulse"
+  res/drawable/ic_launcher.xml        a unique vector icon (108dp)
+  res/layout/activity_main.xml        a real XML layout
+  res/values/strings.xml              app_name / subtitle
+  java/com/buddyapps/pulse/MainActivity.java   setContentView(R.layout.activity_main)
+  app.properties
+```
+
+```sh
+./build-apk.sh pulse
+aapt2 dump badging pulse/build/app.apk | grep -E "application:|package:"
+```
+
+```
+package: name='com.buddyapps.pulse' versionCode='1' versionName='1.0' ... compileSdkVersion='36'
+application: label='Pulse' icon='res/drawable/ic_launcher.xml'
+```
+
+**How to give an APK its own icon.** Put a vector (or PNG) in `res/drawable/` and point the
+manifest at it: `android:icon="@drawable/ic_launcher"` (and `android:roundIcon`). No Gradle needed —
+`aapt2 link` bundles it and `resources.arsc` records the reference. For an adaptive icon, add
+`res/mipmap-anydpi-v26/ic_launcher.xml` referencing `@drawable/ic_launcher_background` and
+`@drawable/ic_launcher_foreground`.
+
+## Can we use Jetpack Compose (Material 3 Expressive)?
+
+**Not with this pipeline.** The snippet below is Kotlin + AndroidX, while `build-apk.sh` is
+`javac` + `d8` with only `android.jar` on the classpath. See `expressive/Expressive.kt`.
+
+```kotlin
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
+import androidx.compose.runtime.Composable
+
+@Composable
+fun MiAppExpressiva(content: @Composable () -> Unit) {
+    MaterialExpressiveTheme(motionScheme = MotionScheme.expressive(), content = content)
+}
+```
+
+What we checked:
+
+| Test | Result |
+|---|---|
+| `javac Expressive.kt` | `error: Class names, 'Expressive.kt', are only accepted if annotation processing is explicitly requested` |
+| Kotlin compiler on Alpine | none (`apk search kotlin` → only `kotlin-language-server`) |
+| `androidx` on classpath | none (only `android.jar`) |
+| API exists? | yes — `material3-android:1.4.0` contains `MaterialExpressiveTheme` and `MotionScheme.expressive()` |
+
+Compose needs, at minimum: a **Kotlin compiler**, the **Compose compiler plugin** (to lower
+`@Composable`), the **AndroidX Compose AARs** and their transitive deps (`material3` alone pulls
+`runtime`, `foundation`, `ui-text`, `foundation-layout`, `graphics-shapes`, `material3-*`,
+`kotlin-stdlib`, …), **AAR resource/manifest merging** into `aapt2 link`, and **dexing all of it**.
+That is a build system — i.e. this is the point where Gradle (or a large custom bootstrap) becomes
+unavoidable.
+
 ## Project rules (avoid the usual failures)
 
 - Package names start with `com.buddyapps.` so they never clash with real apps.
