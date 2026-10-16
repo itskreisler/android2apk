@@ -14,13 +14,15 @@ scripts directamente.
 ```
 res/ ──aapt2 compile──▶ res.zip
 manifest + res.zip ──aapt2 link──▶ base.apk + R.java
-java/ + R.java ──javac (+ .kt con kotlinc)──▶ .class ──d8──▶ classes.dex
-base.apk + classes.dex ──zip (+alineado a 4 bytes)──▶ aligned.apk
+java/ + R.java ──javac (+ .kt con kotlinc)──▶ .class ──d8──▶ classes*.dex
+base.apk + classes*.dex ──zip (+alineado a 4 bytes)──▶ aligned.apk
 aligned.apk ──apksigner──▶ app.apk ✅
 ```
 
 Además soporta **Kotlin** y, opcionalmente, **Jetpack Compose / Material 3** (etapa 3): baja las AAR
-de AndroidX, las fusiona y las dexa junto a la app. Detalles en [docs/04-compose.md](docs/04-compose.md).
+de AndroidX, las fusiona y las dexa junto a la app. Con Compose, `d8` suele pasar de 64K métodos y emite
+**multidex** (`classes.dex`, `classes2.dex`…); el empaquetado los incluye **todos**.
+Detalles en [docs/04-compose.md](docs/04-compose.md).
 
 ## Empezar rápido
 
@@ -56,9 +58,10 @@ Desde cero (Android → Alpine → opencode → primer APK):
 | Doc | Contenido |
 |---|---|
 | [docs/01-camino-simple.md](docs/01-camino-simple.md) | Montar Alpine desde Android (proot-distro), `apk add`, opencode y el primer APK |
-| [docs/02-ejemplos.md](docs/02-ejemplos.md) | Los ejemplos (en `examples/`): `hello`, `pulse`, `notes`, `todo`, `khello`, `compose` |
+| [docs/02-ejemplos.md](docs/02-ejemplos.md) | Los ejemplos (en `examples/`): `hello`, `pulse`, `notes`, `todo`, `khello`, `compose`, `neko` |
 | [docs/03-kotlin.md](docs/03-kotlin.md) | Añadir Kotlin sin Gradle (etapa 1) |
 | [docs/04-compose.md](docs/04-compose.md) | Jetpack Compose / Material 3 Expressive: cómo se compila (etapa 3) |
+| [docs/05-neko-notes.md](docs/05-neko-notes.md) | Neko Notes: app Compose por fases (Keep + Notion), sin Room/Hilt |
 
 > **Filosofía:** esto es el **camino simple** (Alpine + `javac`/`kotlinc` + `d8`). Si necesitas algo
 > más "profesional" (Gradle, SDK completo, emulador), usa Android Studio o un `gradle` normal. Aquí

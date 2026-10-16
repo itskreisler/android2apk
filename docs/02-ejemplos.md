@@ -1,6 +1,6 @@
 # 02 · Ejemplos del repo
 
-Seis proyectos (en `examples/`), de menos a más.
+Siete proyectos (en `examples/`), de menos a más.
 
 **Simple** (Java o Kotlin, sin dependencias):
 
@@ -198,3 +198,25 @@ package: name='com.buddyapps.compose' versionCode='1' versionName='1.0' … comp
   `graphics-path`: `all` (universal, por defecto), `arm64-v8a` (solo arm64), vacío (ninguna).
 
 Cómo se resuelve el grafo de AndroidX sin Gradle, paso a paso: [04-compose.md](04-compose.md).
+
+---
+
+## `neko` — Neko Notes, Compose + Material 3 Expressive, por fases
+
+El ejemplo más ambicioso: una app de notas estilo **Keep + Notion** con estética kawaii, construida
+**por fases**. La especificación pedía Gradle + Room + Hilt (KSP), que este repo **no puede**
+ejecutar; se ha hecho la versión **Compose nativa con persistencia JSON**.
+
+```sh
+./setup-compose.sh
+./build-compose.sh examples/neko
+# → examples/neko/build/Neko-Notes-1.0-<abi>.apk
+```
+
+- **Fase 1** (hecha): tema kawaii claro/oscuro, barra inferior de 4 destinos, Inicio tipo Keep
+  (buscador, filtros, cuadrícula/lista, tarjetas de color), editor de nota y de lista de tareas,
+  etiquetas, búsqueda local, y exportar/importar JSON.
+- **Fases 2–4** (pendientes): páginas y bloques estilo Notion, colecciones, calendario, bases de
+  datos y animaciones/transiciones compartidas.
+
+Por qué no hay Room/Hilt y qué se puede y no se puede verificar aquí: [05-neko-notes.md](05-neko-notes.md).

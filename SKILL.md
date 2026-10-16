@@ -45,7 +45,8 @@ It runs the two setups above and then downloads the AndroidX AAR/JAR closure (~5
 
 Create one folder per app. Ready-made projects live in **`examples/`** — copy one as a starting
 point: `hello` (Java mínimo), `pulse` (icono + `res/`), `notes` (app completa con layouts XML),
-`todo` (lista de tareas con la UI en código), `khello` (Kotlin), `compose` (Jetpack Compose).
+`todo` (lista de tareas con la UI en código), `khello` (Kotlin), `compose` (Jetpack Compose),
+`neko` (Compose por fases, Keep + Notion).
 
 ```
 AndroidManifest.xml      <manifest package="com.buddyapps.<name>"> … one launcher <activity>

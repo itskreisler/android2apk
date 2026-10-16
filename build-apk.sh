@@ -104,13 +104,25 @@ if [ "$COMPOSE" = true ] && [ -d "$LIBS/jni" ]; then
   JNI_DIR=$LIBS/jni
   echo "  nativos: $(find "$JNI_DIR" -name '*.so' | wc -l) .so ($(find "$JNI_DIR" -mindepth 1 -maxdepth 1 -type d | sed 's#.*/##' | tr '\n' ' '))"
 fi
-python3 - "$OUT/base.apk" "$OUT/dex/classes.dex" "$OUT/aligned.apk" "$JNI_DIR" <<'EOF'
-import sys, os, zipfile
-src, dex, dst, jni = sys.argv[1:5]
+python3 - "$OUT/base.apk" "$OUT/dex" "$OUT/aligned.apk" "$JNI_DIR" <<'EOF'
+import sys, os, re, zipfile
+src, dexdir, dst, jni = sys.argv[1:5]
 with zipfile.ZipFile(src) as zin, zipfile.ZipFile(dst, "w") as zout:
     entries = [(i, zin.read(i.filename)) for i in zin.infolist()]
-    entries.append((zipfile.ZipInfo("classes.dex"), open(dex, "rb").read()))
-    entries[-1][0].compress_type = zipfile.ZIP_DEFLATED
+    # d8 emite multidex al pasar de 64K metodos: classes.dex, classes2.dex, ...
+    # Hay que empaquetarlos TODOS, en orden, o faltaran clases en el APK.
+    def dexnum(name):
+        return int(re.fullmatch(r"classes(\d*)\.dex", name).group(1) or "1")
+    dexfiles = sorted(
+        (f for f in os.listdir(dexdir) if re.fullmatch(r"classes\d*\.dex", f)),
+        key=dexnum,
+    )
+    if not dexfiles:
+        sys.exit("no hay classes*.dex en %s" % dexdir)
+    for fn in dexfiles:
+        zi = zipfile.ZipInfo(fn)
+        zi.compress_type = zipfile.ZIP_DEFLATED
+        entries.append((zi, open(os.path.join(dexdir, fn), "rb").read()))
     if jni and os.path.isdir(jni):  # lib/<abi>/*.so venidos de las AAR
         for abi in sorted(os.listdir(jni)):
             adir = os.path.join(jni, abi)
