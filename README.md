@@ -33,6 +33,9 @@ npx -y degit itskreisler/android2apk   # o: git clone https://github.com/itskrei
 cd android2apk
 ```
 
+La *skill* vive en `.opencode/skills/android2apk/`: si abres `opencode` **dentro** de la carpeta del
+repo la detecta sola, y el agente ya sabe crear, compilar y firmar APKs.
+
 Hay dos caminos, cada uno con su **setup** y su **build**:
 
 ### A) Simple — Java o Kotlin, sin dependencias
@@ -119,7 +122,7 @@ Compose) las comprueba **`./lint.sh`**. Sobre iconos y emoji **no falla**: solo 
 |---|---|
 | `check-compose-plugin.sh` | Verifica que el plugin de Compose transforma `@Composable` (etapa 2) |
 | `lint.sh` | Valida scripts (`shellcheck`), XML (`xmllint`), Python y las reglas de los proyectos |
-| `SKILL.md` | La *skill* de agente: cómo crear/compilar/instalar una app con este repo |
+| `.opencode/skills/android2apk/SKILL.md` | La *skill* de agente (OpenCode la descubre sola al abrir el repo): cómo crear/compilar/instalar una app |
 
 Parte de este proyecto deriva de código de terceros; véase **[NOTICE](NOTICE)**
 (licencia Apache-2.0).

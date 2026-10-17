@@ -5,7 +5,7 @@
 #   ./lint.sh                 # scripts + todos los examples/
 #   ./lint.sh examples/todo   # scripts + uno o varios proyectos
 #
-# Las reglas de los proyectos son las de SKILL.md (las que evitan los fallos habituales).
+# Las reglas de los proyectos son las de .opencode/skills/android2apk/SKILL.md.
 set -uo pipefail
 cd "$(dirname "$0")" || exit 1
 fail=0
@@ -52,7 +52,7 @@ else
   echo "omitido (instala con: apk add libxml2-utils)"
 fi
 
-# --- 3) Reglas de los proyectos (SKILL.md) ---------------------------------------
+# --- 3) Reglas de los proyectos (.opencode/skills/android2apk/SKILL.md) ---------------------------------------
 say "reglas de proyectos"
 if [ "$#" -gt 0 ]; then
   targets=("$@")

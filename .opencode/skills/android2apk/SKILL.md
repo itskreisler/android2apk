@@ -9,12 +9,18 @@ Everything runs in an Alpine shell. There is no Gradle and no Android Studio. De
 and the Android framework only (no AndroidX, no external libraries). Kotlin is available through
 `setup-kotlin.sh`, and Jetpack Compose through `setup-compose.sh`.
 
-This skill lives in this repository. `SKILL_DIR` below means this folder.
+This skill lives at `.opencode/skills/android2apk/` inside the repository, so OpenCode discovers
+it automatically when you open the repo. `SKILL_DIR` is this folder; `REPO` is the repository
+root (three levels up), where the `setup-*.sh` / `build*.sh` scripts and `examples/` live:
+
+```sh
+REPO=$(cd "$SKILL_DIR/../../.." && pwd)
+```
 
 ## 1. Toolchain (first time only)
 
 ```sh
-bash $SKILL_DIR/setup-toolchain.sh
+bash $REPO/setup-toolchain.sh
 ```
 
 Downloads about 400 MB the first time (allow up to 10 minutes): OpenJDK 17, `aapt2`, `d8`,
@@ -24,7 +30,7 @@ everything already exists, so run it before the first build.
 For Kotlin projects, also:
 
 ```sh
-bash $SKILL_DIR/setup-kotlin.sh
+bash $REPO/setup-kotlin.sh
 ```
 
 Downloads the Kotlin compiler (~90 MB) and exposes `kotlinc` + `kotlin-stdlib.jar`.
@@ -32,7 +38,7 @@ Downloads the Kotlin compiler (~90 MB) and exposes `kotlinc` + `kotlin-stdlib.ja
 For **Jetpack Compose** projects, one command sets up everything (toolchain + Kotlin + AndroidX):
 
 ```sh
-bash $SKILL_DIR/setup-compose.sh
+bash $REPO/setup-compose.sh
 ```
 
 It runs the two setups above and then downloads the AndroidX AAR/JAR closure (~50 MB) into
@@ -40,7 +46,7 @@ It runs the two setups above and then downloads the AndroidX AAR/JAR closure (~5
 
 ## 2. Project layout
 
-Create one folder per app. Ready-made projects live in **`examples/`** — copy one as a starting
+Create one folder per app. Ready-made projects live in **`$REPO/examples/`** — copy one as a starting
 point: `hello` (Java mínimo), `pulse` (icono + `res/`), `notes` (app completa con layouts XML),
 `todo` (lista de tareas con la UI en código), `khello` (Kotlin), `compose` (Jetpack Compose),
 `neko` (Compose por fases, Keep + Notion).
@@ -73,7 +79,7 @@ Rules that avoid the usual failures:
 ## 3. Build
 
 ```sh
-bash $SKILL_DIR/build-apk.sh <app-dir>
+bash $REPO/build-apk.sh <app-dir>
 ```
 
 Produces `<app-dir>/build/app.apk` plus a descriptive copy `<name>-<version>-<abi>.apk` (e.g.
@@ -86,7 +92,7 @@ For a **Compose** project (`compose=true` in `app.properties`) use the Compose o
 it sets everything up and then builds:
 
 ```sh
-bash $SKILL_DIR/build-compose.sh <app-dir>
+bash $REPO/build-compose.sh <app-dir>
 ```
 
 Compose APKs have no native code by default (pure dex + resources → universal). One AndroidX AAR

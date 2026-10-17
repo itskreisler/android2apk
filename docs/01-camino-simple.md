@@ -49,6 +49,9 @@ cd android2apk
 
 > También vale `git clone https://github.com/itskreisler/android2apk`.
 
+El repo trae una *skill* en `.opencode/skills/android2apk/`: si abres `opencode` **dentro** de la
+carpeta `android2apk`, la carga sola y el agente ya sabe compilar y firmar APKs.
+
 Ahora el setup de la toolchain:
 
 ```sh
