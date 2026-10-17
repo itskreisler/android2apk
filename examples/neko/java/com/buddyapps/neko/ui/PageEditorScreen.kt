@@ -19,12 +19,24 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -99,7 +111,7 @@ fun PageEditorScreen(
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.clickable { onOpenPage(ancestor.id) },
                             )
-                            Text(" › ", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                         }
                         Text(page.title.ifBlank { "Sin título" }, style = MaterialTheme.typography.labelLarge)
                     }
@@ -108,16 +120,19 @@ fun PageEditorScreen(
                     IconButton(
                         onClick = onBack,
                         modifier = Modifier.semantics { contentDescription = "Atrás" },
-                    ) { Text("‹", fontSize = 30.sp) }
+                    ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás") }
                 },
                 actions = {
                     IconButton(onClick = { store.upsertPage(page.copy(favorite = !page.favorite)) }) {
-                        Text(if (page.favorite) "⭐" else "☆", fontSize = 20.sp)
+                        Icon(
+                            imageVector = if (page.favorite) Icons.Filled.Star else Icons.Filled.StarBorder,
+                            contentDescription = if (page.favorite) "Quitar de fijadas" else "Fijar",
+                        )
                     }
                     IconButton(
                         onClick = { store.deletePage(page.id); onBack() },
                         modifier = Modifier.semantics { contentDescription = "Eliminar página" },
-                    ) { Text("🗑", fontSize = 18.sp) }
+                    ) { Icon(Icons.Filled.Delete, contentDescription = "Eliminar página") }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
@@ -208,7 +223,11 @@ fun PageEditorScreen(
                     val child = store.newPage(parentId = page.id, collectionId = page.collectionId)
                     store.upsertPage(child)
                     onOpenPage(child.id)
-                }) { Text("＋ Subpágina") }
+                }) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Subpágina")
+                }
             }
             if (children.isEmpty()) {
                 Text("Sin subpáginas todavía", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -231,7 +250,7 @@ fun PageEditorScreen(
                                 )
                             }
                         }
-                        Text("›", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -285,16 +304,16 @@ private fun BlockRow(block: Block, index: Int, count: Int, pageId: String, store
             }
             if (index > 0) {
                 IconButton(onClick = { store.moveBlock(pageId, index, -1) }, modifier = Modifier.size(26.dp)) {
-                    Text("↑", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Subir bloque", modifier = Modifier.size(18.dp))
                 }
             }
             if (index < count - 1) {
                 IconButton(onClick = { store.moveBlock(pageId, index, 1) }, modifier = Modifier.size(26.dp)) {
-                    Text("↓", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Bajar bloque", modifier = Modifier.size(18.dp))
                 }
             }
             IconButton(onClick = { store.deleteBlock(pageId, block.id) }, modifier = Modifier.size(26.dp)) {
-                Text("✕", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.Filled.Close, contentDescription = "Eliminar bloque", modifier = Modifier.size(18.dp))
             }
         }
         Spacer(Modifier.width(4.dp))
@@ -343,7 +362,7 @@ private fun BlockContent(block: Block, index: Int, pageId: String, store: NoteSt
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("🖼", fontSize = 30.sp)
+                        Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.size(30.dp))
                         Text(
                             "Imagen por URL (sin Coil: solo se guarda la dirección)",
                             style = MaterialTheme.typography.labelSmall,

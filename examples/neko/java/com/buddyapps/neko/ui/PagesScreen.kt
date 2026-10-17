@@ -19,10 +19,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -107,7 +115,11 @@ fun CollectionsScreen(
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Colecciones", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                TextButton(onClick = { creating = true }) { Text("＋ Nueva") }
+                TextButton(onClick = { creating = true }) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Nueva")
+                }
             }
         }
         item {
@@ -141,7 +153,11 @@ fun CollectionsScreen(
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Páginas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                TextButton(onClick = { onCreatePage(null, selected.ifBlank { null }) }) { Text("＋ Nueva") }
+                TextButton(onClick = { onCreatePage(null, selected.ifBlank { null }) }) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Nueva")
+                }
             }
         }
         if (flat.isEmpty()) {
@@ -170,7 +186,11 @@ fun CollectionsScreen(
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Bases de datos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                TextButton(onClick = onCreateDatabase) { Text("＋ Nueva") }
+                TextButton(onClick = onCreateDatabase) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Nueva")
+                }
             }
         }
         if (databases.isEmpty()) {
@@ -199,7 +219,7 @@ fun CollectionsScreen(
                     )
                 }
                 IconButton(onClick = { onDeleteDatabase(db.id) }) {
-                    Text("🗑", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Filled.Delete, contentDescription = "Eliminar base de datos", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -224,10 +244,11 @@ private fun PageRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (hasChildren) {
-            Text(
-                text = if (expanded) "▾" else "▸",
+            Icon(
+                imageVector = if (expanded) Icons.Filled.ArrowDropDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = if (expanded) "Contraer" else "Expandir",
                 modifier = Modifier.clickable(onClick = onToggle).padding(horizontal = 4.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
             Spacer(Modifier.width(20.dp))
@@ -240,8 +261,8 @@ private fun PageRow(
                 Text(collectionName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        if (page.favorite) Text("⭐", fontSize = 13.sp)
-        Text("›", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 6.dp))
+        if (page.favorite) Icon(Icons.Filled.Star, contentDescription = "Fijada", modifier = Modifier.size(13.dp))
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 6.dp))
     }
 }
 
@@ -271,7 +292,7 @@ private fun CollectionCard(
                 Spacer(Modifier.weight(1f))
                 if (onEdit != null) {
                     IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
-                        Text("✎", fontSize = 12.sp)
+                        Icon(Icons.Filled.Edit, contentDescription = "Editar colección", modifier = Modifier.size(14.dp))
                     }
                 }
             }

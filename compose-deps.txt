@@ -21,6 +21,8 @@ androidx.compose.foundation:foundation-layout:1.7.1	aar
 androidx.compose.foundation:foundation-layout-android:1.12.0	aar
 androidx.compose.material3:material3-android:1.5.0-beta01	aar
 androidx.compose.material3:material3-ripple-android:1.5.0-beta01	aar
+androidx.compose.material:material-icons-core-android:1.7.8	aar
+androidx.compose.material:material-icons-extended-android:1.7.8	aar
 androidx.compose.material:material-ripple-android:1.12.0	aar
 androidx.compose.runtime:runtime:1.7.1	aar
 androidx.compose.runtime:runtime-android:1.12.0	aar

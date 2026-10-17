@@ -12,11 +12,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,6 +33,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -91,15 +101,15 @@ fun DatabaseScreen(store: NoteStore, dbId: String, onBack: () -> Unit) {
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(20.dp),
-            ) { Text("＋", fontSize = 24.sp) }
+            ) { Icon(Icons.Filled.Add, contentDescription = "Nuevo registro") }
         },
         topBar = {
             TopAppBar(
                 title = { Row(verticalAlignment = Alignment.CenterVertically) { Text(db.icon); Spacer(Modifier.width(8.dp)); Text(db.name) } },
-                navigationIcon = { IconButton(onClick = onBack) { Text("‹", fontSize = 30.sp) } },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás") } },
                 actions = {
-                    IconButton(onClick = { addingProperty = true }) { Text("＋📋", fontSize = 14.sp) }
-                    IconButton(onClick = { store.deleteDatabase(db.id); onBack() }) { Text("🗑", fontSize = 18.sp) }
+                    IconButton(onClick = { addingProperty = true }) { Icon(Icons.Filled.PlaylistAdd, contentDescription = "Añadir propiedad") }
+                    IconButton(onClick = { store.deleteDatabase(db.id); onBack() }) { Icon(Icons.Filled.Delete, contentDescription = "Eliminar base de datos") }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
@@ -129,7 +139,11 @@ fun DatabaseScreen(store: NoteStore, dbId: String, onBack: () -> Unit) {
                     val v = DBView(UUID.randomUUID().toString(), "Vista ${db.views.size + 1}", ViewType.TABLE)
                     store.addView(db.id, v)
                     viewId = v.id
-                }) { Text("＋ Vista") }
+                }) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Vista")
+                }
             }
 
             if (view != null) {
@@ -160,7 +174,18 @@ fun DatabaseScreen(store: NoteStore, dbId: String, onBack: () -> Unit) {
                                     if (it.sortBy == p.id) it.copy(sortAsc = !it.sortAsc) else it.copy(sortBy = p.id, sortAsc = true)
                                 }
                             },
-                            label = { Text(p.name + if (view.sortBy == p.id) (if (view.sortAsc) " ↑" else " ↓") else "") },
+                            label = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(p.name)
+                                    if (view.sortBy == p.id) {
+                                        Icon(
+                                            imageVector = if (view.sortAsc) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(14.dp),
+                                        )
+                                    }
+                                }
+                            },
                         )
                     }
                 }
@@ -268,7 +293,7 @@ private fun TableView(db: Database, records: List<DBRecord>, store: NoteStore) {
                             Cell(prop, record, db.id, store)
                         }
                     }
-                    IconButton(onClick = { store.deleteRecord(db.id, record.id) }) { Text("✕", fontSize = 12.sp) }
+                    IconButton(onClick = { store.deleteRecord(db.id, record.id) }) { Icon(Icons.Filled.Close, contentDescription = "Eliminar registro", modifier = Modifier.size(16.dp)) }
                 }
                 HorizontalDivider()
             }
@@ -279,7 +304,7 @@ private fun TableView(db: Database, records: List<DBRecord>, store: NoteStore) {
 @Composable
 private fun ListView(db: Database, records: List<DBRecord>, store: NoteStore) {
     if (records.isEmpty()) {
-        Text("Sin registros. Añade uno con el botón ＋", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Sin registros todavía. Crea uno con el botón de abajo.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -340,7 +365,7 @@ private fun BoardView(db: Database, records: List<DBRecord>, view: DBView, store
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis,
                                 )
-                                IconButton(onClick = { store.deleteRecord(db.id, record.id) }) { Text("✕", fontSize = 11.sp) }
+                                IconButton(onClick = { store.deleteRecord(db.id, record.id) }) { Icon(Icons.Filled.Close, contentDescription = "Eliminar registro", modifier = Modifier.size(16.dp)) }
                             }
                             TextButton(onClick = {
                                 val next = groupProp.options.firstOrNull { it != record.value(groupProp.id) }

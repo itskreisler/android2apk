@@ -222,5 +222,8 @@ ejecutar; se ha hecho la versión **Compose nativa con persistencia JSON**.
   datos** locales (tabla/lista/tablero, propiedades, orden y filtros).
 - **Fase 4**: `SharedTransitionLayout` (tarjeta → editor), `AnimatedContent`, feedback háptico,
   estado de carga, accesibilidad y estados vacíos.
+- **Acabado**: icono de lanzamiento **adaptativo** propio (gatito kawaii, `res/mipmap-anydpi-v26/`) e
+  **iconos Material reales** en la interfaz (`Icons.Filled.*` / `Icons.AutoMirrored.Filled.*`, vía
+  `material-icons-core` + `material-icons-extended`); el emoji queda solo para el contenido kawaii.
 
 Por qué no hay Room/Hilt y qué se puede y no se puede verificar aquí: [05-neko-notes.md](05-neko-notes.md).

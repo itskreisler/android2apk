@@ -18,8 +18,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -41,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -55,13 +63,13 @@ import com.buddyapps.neko.ui.theme.NekoTheme
 import com.buddyapps.neko.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
 
-private data class TabSpec(val label: String, val icon: String)
+private data class TabSpec(val label: String, val icon: ImageVector)
 
 private val TABS = listOf(
-    TabSpec("Inicio", "🏠"),
-    TabSpec("Colecciones", "🗂"),
-    TabSpec("Calendario", "📅"),
-    TabSpec("Perfil", "🐾"),
+    TabSpec("Inicio", Icons.Filled.Home),
+    TabSpec("Colecciones", Icons.Filled.Folder),
+    TabSpec("Calendario", Icons.Filled.CalendarMonth),
+    TabSpec("Perfil", Icons.Filled.Pets),
 )
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -193,7 +201,7 @@ private fun Shell(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(20.dp),
-            ) { Text("＋", fontSize = 24.sp) }
+            ) { Icon(Icons.Filled.Add, contentDescription = "Nueva nota") }
 
             1 -> FloatingActionButton(
                 onClick = {
@@ -205,7 +213,7 @@ private fun Shell(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(20.dp),
-            ) { Text("＋", fontSize = 24.sp) }
+            ) { Icon(Icons.Filled.Add, contentDescription = "Nueva página") }
         }
     }
 
@@ -232,7 +240,7 @@ private fun Shell(
                     NavigationBarItem(
                         selected = tab == i,
                         onClick = { onTab(i) },
-                        icon = { Text(t.icon, fontSize = 18.sp) },
+                        icon = { Icon(t.icon, contentDescription = t.label) },
                         label = { Text(t.label) },
                     )
                 }

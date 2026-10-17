@@ -13,14 +13,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -33,7 +41,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.buddyapps.neko.data.Note
 import com.buddyapps.neko.data.NoteFilter
 import com.buddyapps.neko.data.ViewMode
@@ -77,7 +84,7 @@ fun HomeScreen(
                         emoji = if (query.isBlank()) "🐱" else "🐾",
                         title = if (query.isBlank()) "Neko está esperando" else "Sin resultados",
                         subtitle = if (query.isBlank()) {
-                            "Crea tu primera nota con el botón ＋"
+                            "Crea tu primera nota con el botón de abajo"
                         } else {
                             "Prueba con otra palabra o cambia el filtro"
                         },
@@ -166,13 +173,13 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         onValueChange = onQueryChange,
         modifier = Modifier.fillMaxWidth(),
         placeholder = { Text("Buscar notas, tareas, etiquetas…") },
-        leadingIcon = { Text("🔍") },
+        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(
                     onClick = { onQueryChange("") },
                     modifier = Modifier.semantics { contentDescription = "Borrar búsqueda" },
-                ) { Text("✕") }
+                ) { Icon(Icons.Filled.Close, contentDescription = null) }
             }
         },
         singleLine = true,
@@ -211,7 +218,7 @@ private fun FilterRow(
             FilterChip(
                 selected = filter == NoteFilter.FAVORITES,
                 onClick = { onFilterChange(NoteFilter.FAVORITES) },
-                label = { Text("⭐") },
+                label = { Icon(Icons.Filled.Star, contentDescription = "Favoritas", modifier = Modifier.size(16.dp)) },
             )
         }
         IconButton(
@@ -222,7 +229,14 @@ private fun FilterRow(
                 contentDescription = if (viewMode == ViewMode.GRID) "Ver como lista" else "Ver como cuadrícula"
             },
         ) {
-            Text(if (viewMode == ViewMode.GRID) "▦" else "☰", fontSize = 20.sp)
+            Icon(
+                imageVector = if (viewMode == ViewMode.GRID) {
+                    Icons.Filled.GridView
+                } else {
+                    Icons.AutoMirrored.Filled.ViewList
+                },
+                contentDescription = null,
+            )
         }
     }
 }

@@ -32,9 +32,14 @@ persistencia JSON** (`org.json` del framework + fichero en `filesDir`), **sin Ro
 sin DataStore, sin Coil y sin Navigation**. Es coherente con el resto del repo
 (`examples/notes` y `examples/todo` también guardan JSON a mano).
 
-Una consecuencia visible: el cierre de AndroidX **no incluye `material-icons-core`**, así que no
-hay `Icons.Filled.*`. La iconografía se resuelve con **glifos y emoji** (🏠 🗂 📅 🐾 ⭐ 🔍 ＋), que
-además encajan con la estética kawaii. `d8` no reporta ninguna clase faltante en el dex resultante.
+El cierre de AndroidX **no traía `material-icons`**, así que al principio no había `Icons.Filled.*`
+y la iconografía se resolvía con **glifos y emoji**. **Cambiado**: se añadieron
+`material-icons-core` y `material-icons-extended:1.7.8` a
+[`compose-deps.txt`](../compose-deps.txt) (ver [`04-compose.md`](04-compose.md)), de modo que la
+**interfaz usa iconos Material reales** (`Icons.Filled.*` y `Icons.AutoMirrored.Filled.*`) que además
+se tiñen con el color del tema. El **emoji se reserva para el contenido kawaii**: la mascota 🐱 y los
+iconos de página/colección que elige el usuario (como hace Notion). Coste medido: el APK pasa de
+~8,8 MB a ~12,8 MB y de 2 a 3 ficheros `.dex` (sin R8 no se recortan los iconos no usados).
 
 ---
 

@@ -14,12 +14,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
@@ -144,18 +151,26 @@ fun EmptyState(emoji: String, title: String, subtitle: String, modifier: Modifie
 }
 
 @Composable
-fun PillTag(text: String, modifier: Modifier = Modifier) {
+fun PillTag(text: String, icon: ImageVector? = null, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(50),
         color = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
+        Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-        )
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
+                Icon(icon, contentDescription = null, modifier = Modifier.size(12.dp))
+                Spacer(Modifier.width(4.dp))
+            }
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
     }
 }
 
@@ -198,7 +213,12 @@ fun NoteCard(
                         .size(28.dp)
                         .semantics { contentDescription = if (note.favorite) "Quitar de fijadas" else "Fijar nota" },
                 ) {
-                    Text(if (note.favorite) "⭐" else "☆", fontSize = 16.sp, color = NekoText)
+                    Icon(
+                        imageVector = if (note.favorite) Icons.Filled.Star else Icons.Filled.StarBorder,
+                        contentDescription = null,
+                        tint = NekoText,
+                        modifier = Modifier.size(16.dp),
+                    )
                 }
             }
             Spacer(Modifier.height(4.dp))
@@ -260,7 +280,20 @@ fun NoteCard(
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (note.dueDate > 0) {
-                    Text("📅 ${formatDay(note.dueDate)}", style = MaterialTheme.typography.labelSmall, color = Color(0x99000000))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.CalendarMonth,
+                            contentDescription = null,
+                            tint = Color(0x99000000),
+                            modifier = Modifier.size(12.dp),
+                        )
+                        Spacer(Modifier.width(3.dp))
+                        Text(
+                            formatDay(note.dueDate),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0x99000000),
+                        )
+                    }
                     Spacer(Modifier.weight(1f))
                 }
                 Text(

@@ -22,8 +22,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -43,7 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.buddyapps.neko.data.ChecklistItem
 import com.buddyapps.neko.data.Note
 import com.buddyapps.neko.ui.theme.NoteCardColors
@@ -87,12 +95,15 @@ fun EditorScreen(
         topBar = {
             TopAppBar(
                 title = { Text(if (note.isTaskList) "Lista de tareas" else "Nota") },
-                navigationIcon = { IconButton(onClick = onBack) { Text("‹", fontSize = 30.sp) } },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás") } },
                 actions = {
                     IconButton(onClick = { onChange(note.copy(favorite = !note.favorite)) }) {
-                        Text(if (note.favorite) "⭐" else "☆", fontSize = 20.sp)
+                        Icon(
+                            imageVector = if (note.favorite) Icons.Filled.Star else Icons.Filled.StarBorder,
+                            contentDescription = if (note.favorite) "Quitar de fijadas" else "Fijar",
+                        )
                     }
-                    IconButton(onClick = onDelete) { Text("🗑", fontSize = 18.sp) }
+                    IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, contentDescription = "Eliminar") }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
@@ -156,7 +167,7 @@ fun EditorScreen(
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (note.dueDate > 0) {
-                    PillTag("📅 ${formatDay(note.dueDate)}")
+                    PillTag(formatDay(note.dueDate), icon = Icons.Filled.CalendarMonth)
                     TextButton(onClick = { onChange(note.copy(dueDate = 0)) }) { Text("Quitar") }
                 } else {
                     TextButton(onClick = { onChange(note.copy(dueDate = startOfDay(System.currentTimeMillis()))) }) { Text("Hoy") }
@@ -199,7 +210,11 @@ fun EditorScreen(
                     if (t.isNotEmpty() && t !in note.tags) onChange(note.copy(tags = note.tags + t))
                     tagDraft = ""
                 },
-            ) { Text("＋ Añadir etiqueta") }
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Añadir etiqueta")
+            }
 
             Spacer(Modifier.height(32.dp))
         }
@@ -230,18 +245,24 @@ private fun TaskItems(note: Note, onChange: (Note) -> Unit, onPickDate: (Int) ->
                 },
             )
             if (item.dueDate > 0) {
-                TextButton(onClick = { onPickDate(index) }) { Text("📅", fontSize = 14.sp) }
+                TextButton(onClick = { onPickDate(index) }) {
+                    Icon(Icons.Filled.CalendarMonth, contentDescription = "Cambiar fecha", modifier = Modifier.size(16.dp))
+                }
             } else {
-                IconButton(onClick = { onPickDate(index) }) { Text("📅", fontSize = 14.sp) }
+                IconButton(onClick = { onPickDate(index) }) {
+                    Icon(Icons.Filled.CalendarMonth, contentDescription = "Añadir fecha", modifier = Modifier.size(16.dp))
+                }
             }
             IconButton(onClick = { onChange(note.copy(items = note.items.filterIndexed { i, _ -> i != index })) }) {
-                Text("✕", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.Filled.Close, contentDescription = "Eliminar elemento", modifier = Modifier.size(18.dp))
             }
         }
     }
     Spacer(Modifier.height(4.dp))
     TextButton(onClick = { onChange(note.copy(items = note.items + ChecklistItem(""))) }) {
-        Text("＋ Añadir elemento")
+        Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text("Añadir elemento")
     }
 }
 
@@ -284,7 +305,7 @@ private fun TagRow(tags: List<String>, onChange: (List<String>) -> Unit) {
             ) {
                 Text("#$tag", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.width(6.dp))
-                Text("✕", style = MaterialTheme.typography.labelSmall)
+                Icon(Icons.Filled.Close, contentDescription = "Quitar etiqueta", modifier = Modifier.size(12.dp))
             }
         }
     }

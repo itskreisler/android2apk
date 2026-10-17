@@ -18,7 +18,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -103,7 +110,7 @@ fun CalendarScreen(store: NoteStore, onOpenNote: (String) -> Unit) {
     ) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = { anchor = shiftMonth(anchor, -1) }) { Text("◀") }
+                TextButton(onClick = { anchor = shiftMonth(anchor, -1) }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Mes anterior") }
                 Text(
                     text = monthTitle.replaceFirstChar { it.uppercase() },
                     style = MaterialTheme.typography.titleMedium,
@@ -111,7 +118,7 @@ fun CalendarScreen(store: NoteStore, onOpenNote: (String) -> Unit) {
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = { anchor = shiftMonth(anchor, 1) }) { Text("▶") }
+                TextButton(onClick = { anchor = shiftMonth(anchor, 1) }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Mes siguiente") }
             }
         }
         item {
@@ -194,14 +201,22 @@ fun CalendarScreen(store: NoteStore, onOpenNote: (String) -> Unit) {
                 modifier = Modifier.fillMaxWidth().clickable { onOpenNote(entry.noteId) }.padding(vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(if (entry.task) (if (entry.done) "☑" else "☐") else "📝", fontSize = 18.sp)
+                Icon(
+                    imageVector = when {
+                        !entry.task -> Icons.Filled.EventNote
+                        entry.done -> Icons.Filled.CheckBox
+                        else -> Icons.Filled.CheckBoxOutlineBlank
+                    },
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
                 Spacer(Modifier.width(10.dp))
                 Text(
                     text = entry.label,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f),
                 )
-                Text("›", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

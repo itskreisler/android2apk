@@ -81,11 +81,12 @@ Esa firma `(String, Composer, int)` es la prueba: el plugin insertó el `Compose
 
 `setup-compose.sh` resuelve el grafo sin Gradle:
 
-- **Versiones fijadas** en [`compose-deps.txt`](../compose-deps.txt): **88 dependencias** (69 `.aar` +
+- **Versiones fijadas** en [`compose-deps.txt`](../compose-deps.txt): **90 dependencias** (71 `.aar` +
   19 `.jar`). Raíces: `androidx.compose.material3:material3-android:1.5.0-beta01` y
   `androidx.activity:activity-compose:1.8.2`; de ahí sale el tren **Compose 1.12.0**. El fichero se
   regenera con [`tools/resolve-compose-deps.py`](../tools/resolve-compose-deps.py), que recorre los
-  POM de Maven.
+  POM de Maven. A esa lista se añadieron a mano `material-icons-core-android` y
+  `material-icons-extended-android:1.7.8` (los `Icons.*`), que `material3` no arrastra.
 - **Descarga**: de Google Maven y, si falla, de Maven Central, con el patrón
   `…/<grupo con / >/<artefacto>/<versión>/<artefacto>-<versión>.<aar|jar>`.
 - **Recursos**: se extrae el `res/` de cada AAR y se **fusiona** en `res-merged/`. Gana el primero que
@@ -95,7 +96,7 @@ Esa firma `(String, Composer, int)` es la prueba: el plugin insertó el `Compose
   referencias del estilo `androidx/compose/material3/R$string.*`.
 - **Compilación**: `kotlinc -Xplugin=compose-compiler-plugin.jar` con **`-jvm-target 11`** (AndroidX se
   publica con target 11).
-- **Dex**: `d8` con las clases de la app + `kotlin-stdlib` + los **74 `.jar`** de AndroidX (55 salen de
+- **Dex**: `d8` con las clases de la app + `kotlin-stdlib` + los **76 `.jar`** de AndroidX (57 salen de
   AAR con `classes.jar` real + 19 `.jar` directos; se saltan los *stubs* KMP vacíos).
 
 ### Código nativo y ABI
