@@ -26,6 +26,13 @@ Detalles en [docs/04-compose.md](docs/04-compose.md).
 
 ## Empezar rápido
 
+Con Node instalado, la forma más directa de traer el repo es `degit` (copia limpia, sin historia de git):
+
+```sh
+npx -y degit itskreisler/android2apk   # o: git clone https://github.com/itskreisler/android2apk
+cd android2apk
+```
+
 Hay dos caminos, cada uno con su **setup** y su **build**:
 
 ### A) Simple — Java o Kotlin, sin dependencias

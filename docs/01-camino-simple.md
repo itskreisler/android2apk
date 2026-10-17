@@ -39,11 +39,19 @@ A partir de aquí, el agente te ayuda a crear y compilar las apps.
 
 ## 3. Traer el repo y los scripts
 
-Clona este repositorio (o usa la carpeta donde ya lo tengas) y ejecuta el setup:
+En este punto ya tienes Node (paso 1), así que lo más directo es
+[`degit`](https://github.com/Rich-Harris/degit): descarga una copia limpia del repo, sin historia de git.
 
 ```sh
-git clone <URL-del-repo> android2apk   # si aún no lo tienes
+npx -y degit itskreisler/android2apk
 cd android2apk
+```
+
+> También vale `git clone https://github.com/itskreisler/android2apk`.
+
+Ahora el setup de la toolchain:
+
+```sh
 ./setup-toolchain.sh
 ```
 
