@@ -11,6 +11,7 @@ emulador), este no es el sitio: mira la nota al final.
 ## 1. Instalar Alpine (desde Android, en Termux)
 
 ```sh
+pkg install proot-distro        # en Termux (una vez)
 pd install -n alpine https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/aarch64/alpine-minirootfs-3.24.2-aarch64.tar.gz
 pd login alpine
 ```
@@ -36,14 +37,13 @@ opencode
 Esto deja el binario en `~/.opencode/bin/opencode` (en este entorno, opencode v2.0.31).
 A partir de aquí, el agente te ayuda a crear y compilar las apps.
 
-## 3. Traer los scripts del pipeline
+## 3. Traer el repo y los scripts
 
-Estos scripts vienen del proyecto [buddy-android](https://github.com/ghorbelhamdi/buddy-android)
-(carpeta `linux/android-app/`), que es exactamente esta idea: compilar APKs *on-device* sin Gradle.
+Clona este repositorio (o usa la carpeta donde ya lo tengas) y ejecuta el setup:
 
 ```sh
-git clone https://github.com/ghorbelhamdi/buddy-android
-cd buddy-android/linux/android-app
+git clone <URL-del-repo> android2apk   # si aún no lo tienes
+cd android2apk
 ./setup-toolchain.sh
 ```
 
@@ -61,8 +61,8 @@ Un proyecto mínimo es una carpeta con tres cosas:
 
 ```
 examples/hello/
-  AndroidManifest.xml      package="com.buddyapps.hello"
-  java/com/buddyapps/hello/MainActivity.java
+  AndroidManifest.xml      package="com.klei.hello"
+  java/com/klei/hello/MainActivity.java
   app.properties           versionCode=1  versionName=1.0  minSdk=26
 ```
 
@@ -84,7 +84,7 @@ Built /ruta/a/hello/build/app.apk
 ```
 
 El APK queda firmado en `<proyecto>/build/app.apk`. La clave de firma se crea sola la primera vez en
-`~/.buddy/keys/apps.jks` (RSA 2048). **Consérvala**: las actualizaciones deben firmarse con la misma
+`~/.klei/keys/apps.jks` (RSA 2048). **Consérvala**: las actualizaciones deben firmarse con la misma
 clave.
 
 Verificar:
@@ -96,25 +96,26 @@ apksigner verify --verbose examples/hello/build/app.apk
 # Verified using v3 scheme …: true
 ```
 
-## 5. Este repo
+## 5. Compilar el primer ejemplo
 
-`android2apk` es una copia de esos scripts, con ejemplos y mejoras (soporte de Kotlin). Se usa igual:
+Con la toolchain lista, compila cualquiera de los ejemplos del repo:
 
 ```sh
-./setup-toolchain.sh
 ./build.sh examples/hello   # toolchain + build en un paso
 ```
+
+El repo también trae soporte de **Kotlin** (`./setup-kotlin.sh`) y **Compose** (`./setup-compose.sh`), con ejemplos para ambos.
 
 Sigue en **[02-ejemplos.md](02-ejemplos.md)**.
 
 ## Instalar el APK en el teléfono (opcional)
 
 Aquí no hay Android: el APK es solo un archivo. Para instalarlo, cópialo al teléfono, o sírvelo
-localmente y deja que Buddy lo instale con su herramienta `install_apk`:
+localmente y deja que Klei lo instale con su herramienta `install_apk`:
 
 ```sh
 python3 -m http.server 8080 --directory examples/hello/build
-# luego pídele a Buddy: install_apk http://127.0.0.1:8080/app.apk
+# luego pídele a Klei: install_apk http://127.0.0.1:8080/app.apk
 ```
 
 El instalador de Android y Play Protect ignoran los toques de apps de accesibilidad, así que **el

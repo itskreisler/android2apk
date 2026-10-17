@@ -1,0 +1,14 @@
+android2apk
+===========
+
+Este proyecto incluye código adaptado de software de terceros:
+
+  buddy-android — linux/android-app
+  https://github.com/ghorbelhamdi/buddy-android
+  Licencia: Apache License 2.0
+
+El texto íntegro de la licencia está en el fichero LICENSE.
+
+---
+NOTICE: requerido por la sección 4(c) de la Apache License 2.0. Si distribuyes este
+proyecto (o un derivado), conserva este fichero junto con la licencia.

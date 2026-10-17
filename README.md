@@ -3,8 +3,8 @@
 Compilar un **APK Android firmado desde Java (o Kotlin) plano, dentro de Alpine Linux** — sin
 Gradle, sin Android Studio y sin PC. Solo `aapt2` → `javac`/`kotlinc` → `d8` → zip + align → `apksigner`.
 
-Es el pipeline de build *on-device* que usa [Buddy](https://github.com/ghorbelhamdi/buddy-android),
-ejecutado **directamente en una shell Alpine**. Buddy normalmente lo corre dentro de un Alpine
+Es el pipeline de build *on-device* que usa **Klei**, ejecutado **directamente en una shell Alpine**.
+Klei normalmente lo corre dentro de un Alpine
 embebido (vía [proot](https://proot-me.github.io/), porque Android solo deja ejecutar binarios desde
 la carpeta nativa del APK); dentro de Alpine ese andamiaje no hace falta, así que llamamos a los
 scripts directamente.
@@ -70,7 +70,7 @@ Desde cero (Android → Alpine → opencode → primer APK):
 
 ## Reglas del proyecto (evitan los fallos habituales)
 
-- Los paquetes empiezan por `com.buddyapps.` para no chocar con apps reales.
+- Los paquetes empiezan por `com.klei.` para no chocar con apps reales.
 - `package="…"` en `<manifest>` y `android:exported="true"` en la activity de lanzamiento.
 - Tema `@android:style/Theme.DeviceDefault` (sin AppCompat).
 - UI en código (`LinearLayout`, `Button`, `TextView`…) o en `res/layout/`.
@@ -78,7 +78,7 @@ Desde cero (Android → Alpine → opencode → primer APK):
   (Kotlin necesita `./setup-kotlin.sh` una vez; AndroidX/Compose necesita `./setup-compose.sh`.)
 - Sube `versionCode` en `app.properties` en cada actualización.
 
-Estas reglas (paquete `com.buddyapps.*`, `android:exported`, tema del sistema, sin AndroidX salvo
+Estas reglas (paquete `com.klei.*`, `android:exported`, tema del sistema, sin AndroidX salvo
 Compose) las comprueba **`./lint.sh`**.
 
 ## Scripts
@@ -109,5 +109,5 @@ Compose) las comprueba **`./lint.sh`**.
 | `lint.sh` | Valida scripts (`shellcheck`), XML (`xmllint`), Python y las reglas de los proyectos |
 | `SKILL.md` | La *skill* de agente: cómo crear/compilar/instalar una app con este repo |
 
-Scripts y `SKILL.md` adaptados de **buddy-android** (Apache-2.0):
-https://github.com/ghorbelhamdi/buddy-android
+Parte de este proyecto deriva de código de terceros; véase **[NOTICE](NOTICE)**
+(licencia Apache-2.0).

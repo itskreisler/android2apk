@@ -71,8 +71,8 @@ for dir in "${targets[@]}"; do
   errors=""
 
   if [ -f "$manifest" ]; then
-    grep -q 'package="com\.buddyapps\.' "$manifest" \
-      || errors="$errors\n    el <manifest> no usa package=\"com.buddyapps.*\""
+    grep -q 'package="com\.klei\.' "$manifest" \
+      || errors="$errors\n    el <manifest> no usa package=\"com.klei.*\""
     grep -q 'android:exported="true"' "$manifest" \
       || errors="$errors\n    la activity de lanzamiento no tiene android:exported=\"true\""
     grep -qE 'android:theme="@android:style/' "$manifest" \

@@ -25,8 +25,8 @@ El APK sale en `<proyecto>/build/app.apk`, firmado, además de una copia con nom
 
 ```
 examples/hello/
-  AndroidManifest.xml                 package="com.buddyapps.hello"
-  java/com/buddyapps/hello/MainActivity.java
+  AndroidManifest.xml                 package="com.klei.hello"
+  java/com/klei/hello/MainActivity.java
   app.properties                      versionCode=1 versionName=1.0 minSdk=26
 ```
 
@@ -36,8 +36,8 @@ aapt2 dump badging examples/hello/build/app.apk | grep -E "package:|launchable"
 ```
 
 ```
-package: name='com.buddyapps.hello' versionCode='1' versionName='1.0' … compileSdkVersion='36'
-launchable-activity: name='com.buddyapps.hello.MainActivity'
+package: name='com.klei.hello' versionCode='1' versionName='1.0' … compileSdkVersion='36'
+launchable-activity: name='com.klei.hello.MainActivity'
 ```
 
 Sin `res/`: la UI se construye en Java (`TextView`, `LinearLayout`…).
@@ -50,11 +50,11 @@ Añade un árbol `res/`, así que `aapt2 compile` corre y el lanzador recibe **s
 
 ```
 examples/pulse/
-  AndroidManifest.xml                 package="com.buddyapps.pulse"
+  AndroidManifest.xml                 package="com.klei.pulse"
   res/drawable/ic_launcher.xml        icono vectorial único (108dp)
   res/layout/activity_main.xml        layout XML real
   res/values/strings.xml              app_name / subtitle
-  java/com/buddyapps/pulse/MainActivity.java   setContentView(R.layout.activity_main)
+  java/com/klei/pulse/MainActivity.java   setContentView(R.layout.activity_main)
   app.properties
 ```
 
@@ -64,7 +64,7 @@ aapt2 dump badging examples/pulse/build/app.apk | grep -E "application:|package:
 ```
 
 ```
-package: name='com.buddyapps.pulse' versionCode='1' versionName='1.0' … compileSdkVersion='36'
+package: name='com.klei.pulse' versionCode='1' versionName='1.0' … compileSdkVersion='36'
 application: label='Pulse' icon='res/drawable/ic_launcher.xml'
 ```
 
@@ -90,7 +90,7 @@ examples/notes/
   res/layout/activity_main.xml        rejilla (dos columnas + FAB)
   res/layout/activity_edit.xml        título + cuerpo + fila de color + guardar
   res/values/strings.xml
-  java/com/buddyapps/notes/
+  java/com/klei/notes/
     Note.java            una nota (id, título, cuerpo, color, actualizado)
     NoteStore.java       carga/guarda notes.json en filesDir
     MainActivity.java    rejilla Keep: dos columnas, toca = editar, mantén = borrar
@@ -105,7 +105,7 @@ aapt2 dump badging examples/notes/build/app.apk | grep -E "application:|launchab
 
 ```
 application: label='Notas' icon='res/drawable/ic_launcher.xml'
-launchable-activity: name='com.buddyapps.notes.MainActivity'
+launchable-activity: name='com.klei.notes.MainActivity'
 ```
 
 Cómo funciona:
@@ -128,8 +128,8 @@ La misma idea que `notes`, pero montada **exactamente como lo hace el repo origi
 
 ```
 examples/todo/
-  AndroidManifest.xml                       package="com.buddyapps.todo" (label "Tareas")
-  java/com/buddyapps/todo/MainActivity.java la app entera en un archivo
+  AndroidManifest.xml                       package="com.klei.todo" (label "Tareas")
+  java/com/klei/todo/MainActivity.java la app entera en un archivo
   app.properties
 ```
 
@@ -154,7 +154,7 @@ El mismo *hello world* pero en **Kotlin**, demostrando que los `.kt` compilan si
 ```
 examples/khello/
   AndroidManifest.xml
-  java/com/buddyapps/khello/MainActivity.kt
+  java/com/klei/khello/MainActivity.kt
   app.properties
 ```
 
@@ -175,8 +175,8 @@ AndroidX, sin Gradle.
 
 ```
 examples/compose/
-  AndroidManifest.xml                          package="com.buddyapps.compose" (label "Compose")
-  java/com/buddyapps/compose/MainActivity.kt   MaterialExpressiveTheme + un contador
+  AndroidManifest.xml                          package="com.klei.compose" (label "Compose")
+  java/com/klei/compose/MainActivity.kt   MaterialExpressiveTheme + un contador
   app.properties                               compose=true
 ```
 
@@ -187,7 +187,7 @@ aapt2 dump badging examples/compose/build/app.apk | grep -E "package:|native-cod
 ```
 
 ```
-package: name='com.buddyapps.compose' versionCode='1' versionName='1.0' … compileSdkVersion='36'
+package: name='com.klei.compose' versionCode='1' versionName='1.0' … compileSdkVersion='36'
 # (sin native-code si no se incluyen las .so)
 ```
 

@@ -68,7 +68,7 @@ Se pasa a `kotlinc` con `-Xplugin`, y basta tener `compose-runtime` en el classp
 Que compila `examples/expressive/ComposeCheck.kt` y muestra que la función ahora recibe un `Composer`:
 
 ```
-public final class com.buddyapps.composecheck.ComposeCheckKt {
+public final class com.klei.composecheck.ComposeCheckKt {
   public static final void Saludo(java.lang.String, androidx.compose.runtime.Composer, int);
 }
 OK: el plugin de Compose transformó @Composable (aparece Composer).
@@ -129,7 +129,7 @@ Resultado medido:
 examples/compose/build/app.apk   5.578.584 bytes (~5,3 MiB)
   classes.dex       ~14,7 MB en crudo
   resources.arsc      500 KB
-package=com.buddyapps.compose   minSdk 26   targetSdk 36   (firmado)
+package=com.klei.compose   minSdk 26   targetSdk 36   (firmado)
 ```
 
 ## Versiones: por qué `material3 1.5.0-beta01`
@@ -159,7 +159,7 @@ Toolchain (los baja `setup-toolchain.sh`):
 
 - build-tools 36: <https://dl.google.com/android/repository/build-tools_r36_linux.zip>
 - plataforma 36: <https://dl.google.com/android/repository/platform-36_r02.zip>
-- base: [buddy-android](https://github.com/ghorbelhamdi/buddy-android) (Apache-2.0)
+- base: código adaptado de terceros (Apache-2.0); véase `NOTICE`
 
 ## Límites
 

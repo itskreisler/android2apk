@@ -29,8 +29,8 @@ kotlinc -classpath "$SDK_JAR:$RT" -Xplugin="$PLUGIN" \
   -jvm-target 1.8 -nowarn -d "$OUT/out" examples/expressive/ComposeCheck.kt
 
 echo "Firma generada:"
-javap -p -classpath "$OUT/out" com.buddyapps.composecheck.ComposeCheckKt
-if javap -p -classpath "$OUT/out" com.buddyapps.composecheck.ComposeCheckKt | grep -q "Composer"; then
+javap -p -classpath "$OUT/out" com.klei.composecheck.ComposeCheckKt
+if javap -p -classpath "$OUT/out" com.klei.composecheck.ComposeCheckKt | grep -q "Composer"; then
   echo "OK: el plugin de Compose transformó @Composable (aparece Composer)."
 else
   echo "FALLO: no se ve el parámetro Composer." >&2

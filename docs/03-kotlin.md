@@ -53,12 +53,12 @@ Puedes cambiarla con `KOTLIN_VERSION=… ./setup-kotlin.sh` si algún día tiene
 ```
 examples/khello/
   AndroidManifest.xml
-  java/com/buddyapps/khello/MainActivity.kt
+  java/com/klei/khello/MainActivity.kt
   app.properties
 ```
 
 ```kotlin
-package com.buddyapps.khello
+package com.klei.khello
 
 import android.app.Activity
 import android.os.Bundle
@@ -88,7 +88,7 @@ class MainActivity : Activity() {
 # Built /root/android2apk/examples/khello/build/app.apk
 
 apksigner verify examples/khello/build/app.apk && echo OK
-unzip -p examples/khello/build/app.apk classes.dex | strings | grep -E "buddyapps/khello/MainActivity|kotlin/jvm/internal/Intrinsics"
+unzip -p examples/khello/build/app.apk classes.dex | strings | grep -E "klei/khello/MainActivity|kotlin/jvm/internal/Intrinsics"
 ```
 
 Nota: el APK de Kotlin pesa bastante más (~640 KB frente a ~10 KB del de Java) porque incluye

@@ -1,4 +1,4 @@
-package com.buddyapps.composecheck
+package com.klei.composecheck
 
 import androidx.compose.runtime.Composable
 

@@ -6,4 +6,4 @@ build/
 # signing keys — never commit
 *.jks
 *.keystore
-.buddy-keys/
+.klei-keys/

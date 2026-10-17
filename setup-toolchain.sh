@@ -3,7 +3,6 @@
 #   aapt2/zipalign: Alpine's android-build-tools (edge/testing, built for this arch)
 #   javac: OpenJDK 17;  d8 + apksigner: Google's build-tools jars;  android.jar: the Android 36 platform
 #
-# Adapted from buddy-android (Apache-2.0): https://github.com/ghorbelhamdi/buddy-android
 set -euo pipefail
 SDK=$HOME/android-sdk
 E=https://dl-cdn.alpinelinux.org/alpine/edge

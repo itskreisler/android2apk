@@ -105,13 +105,13 @@ iconos de página/colección que elige el usuario (como hace Notion). Coste medi
 
 ```
 examples/neko/
-  AndroidManifest.xml                    package="com.buddyapps.neko" (label "Neko Notes")
+  AndroidManifest.xml                    package="com.klei.neko" (label "Neko Notes")
   app.properties                         versionCode=1 versionName=1.0 minSdk=26 name=Neko Notes compose=true
   res/drawable/ic_launcher_background.xml  fondo degradado (violeta → rosa)
   res/drawable/ic_launcher_foreground.xml  gatito kawaii (cara)
   res/mipmap-anydpi-v26/ic_launcher.xml    icono adaptativo (con <monochrome> para iconos temáticos)
   res/mipmap-anydpi-v26/ic_launcher_round.xml
-  java/com/buddyapps/neko/
+  java/com/klei/neko/
     MainActivity.kt                      ComponentActivity → NekoApp()
     data/Note.kt                         Note, ChecklistItem, NoteFilter, ViewMode (+ JSON)
     data/Models.kt                       Block/BlockType, Page, Collection, Database (propiedades,
