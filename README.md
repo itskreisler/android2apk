@@ -123,6 +123,7 @@ Compose) las comprueba **`./lint.sh`**. Sobre iconos y emoji **no falla**: solo 
 | `check-compose-plugin.sh` | Verifica que el plugin de Compose transforma `@Composable` (etapa 2) |
 | `lint.sh` | Valida scripts (`shellcheck`), XML (`xmllint`), Python y las reglas de los proyectos |
 | `.opencode/skills/android2apk/SKILL.md` | La *skill* de agente (OpenCode la descubre sola al abrir el repo): cómo crear/compilar/instalar una app |
+| `AGENTS.md` | Punto de entrada para otros agentes: apunta a la skill |
 
 Parte de este proyecto deriva de código de terceros; véase **[NOTICE](NOTICE)**
 (licencia Apache-2.0).
