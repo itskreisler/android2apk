@@ -77,9 +77,14 @@ Desde cero (Android → Alpine → opencode → primer APK):
 - Java o Kotlin + el framework de Android: sin AndroidX ni librerías externas.
   (Kotlin necesita `./setup-kotlin.sh` una vez; AndroidX/Compose necesita `./setup-compose.sh`.)
 - Sube `versionCode` en `app.properties` en cada actualización.
+- **Iconos, no emojis**: para botones, pestañas y navegación usa iconos Material (`Icons.Filled.*`);
+  el emoji se reserva para contenido (mascota o datos que guarda el usuario).
+- **Icono propio**: no dejes el icono del sistema; añade `res/drawable/ic_launcher.xml` y apunta el
+  manifest (`android:icon` + `android:roundIcon`). Pregunta al usuario si prefiere aportar una
+  imagen o que el agente lo cree según la idea de la app.
 
 Estas reglas (paquete `com.klei.*`, `android:exported`, tema del sistema, sin AndroidX salvo
-Compose) las comprueba **`./lint.sh`**.
+Compose) las comprueba **`./lint.sh`**. Sobre iconos y emoji **no falla**: solo sugiere.
 
 ## Scripts
 

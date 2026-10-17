@@ -1,5 +1,6 @@
 #!/bin/bash
 # lint.sh — valida scripts, XML y las reglas de los ejemplos de este repo.
+# Además sugiere mejoras (icono de app, emoji) SIN fallar por ellas.
 #
 #   ./lint.sh                 # scripts + todos los examples/
 #   ./lint.sh examples/todo   # scripts + uno o varios proyectos
@@ -102,6 +103,61 @@ for dir in "${targets[@]}"; do
     printf 'OK    %s\n' "$name"
   fi
 done
+
+# --- 4) Sugerencias: NO fallan, solo orientan al usuario --------------------------
+say "sugerencias (no fallan; solo orientan)"
+python3 - "$@" <<'PY'
+import os, sys, re, glob
+
+args = sys.argv[1:]
+dirs = args if args else sorted(d for d in glob.glob("examples/*") if os.path.isdir(d))
+
+emoji_re = re.compile(
+    "[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U00002B00-\U00002BFF"
+    "\U0001F1E6-\U0001F1FF\U00002190-\U000021FF\U0000FE0F]"
+)
+
+sin_icono, con_emoji = [], []
+for d in dirs:
+    man = os.path.join(d, "AndroidManifest.xml")
+    if not os.path.isfile(man):
+        continue
+    name = os.path.basename(os.path.normpath(d))
+    s = open(man, encoding="utf-8", errors="replace").read()
+    m = re.search(r'android:icon="([^"]+)"', s)
+    icon = m.group(1) if m else ""
+    if (not icon) or "sym_def_app_icon" in icon:
+        sin_icono.append(name)
+    n = 0
+    for dp, _dns, fns in os.walk(d):
+        if os.sep + "build" + os.sep in dp + os.sep:
+            continue
+        for fn in fns:
+            if fn.endswith((".java", ".kt")):
+                try:
+                    t = open(os.path.join(dp, fn), encoding="utf-8").read()
+                except OSError:
+                    continue
+                n += len(emoji_re.findall(t))
+    if n:
+        con_emoji.append((name, n))
+
+if sin_icono:
+    print("Icono de app: usan el icono del sistema -> " + ", ".join(sin_icono))
+    print("  \u00bfLe damos uno propio? Opciones:")
+    print("    (1) el usuario aporta una imagen (PNG/SVG) y la convertimos a un vector")
+    print("        en res/drawable/ic_launcher.xml (+ android:icon y android:roundIcon)")
+    print("    (2) el agente lo crea seg\u00fan la idea de la app")
+else:
+    print("Icono de app: todos los proyectos tienen icono propio.")
+
+if con_emoji:
+    print("Emoji en fuentes (recuerda: Icons.* en botones/navegaci\u00f3n; emoji solo para contenido):")
+    for name, c in con_emoji:
+        print("  - %s: %d emoji(s)" % (name, c))
+
+print("(ninguna sugerencia es un error: lint sigue en verde)")
+PY
 
 printf '\n'
 if [ "$fail" = 0 ]; then

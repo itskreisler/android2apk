@@ -60,8 +60,15 @@ Rules that avoid the usual failures:
 - Use `android:theme="@android:style/Theme.DeviceDefault"` (no AppCompat).
 - Build the UI in Java code (LinearLayout, Button, TextView…) unless you use XML layouts.
 - Java 8 syntax is fine (lambdas OK). Don't use `R.layout` unless you created that layout.
-- For an icon, reuse `@android:drawable/sym_def_app_icon` or add `res/drawable/ic_launcher.xml`
-  (a vector) and set `android:icon="@drawable/ic_launcher"`.
+- **Icons, not emoji**: use Material icons (`Icons.Filled.*` / `Icons.AutoMirrored.Filled.*`) for
+  buttons, tabs and navigation. Keep emoji only for content (a mascot, or values the user stores in
+  the data). In plain-Java apps (no Compose) use `res/drawable/` vectors or `@android:drawable/*`
+  glyphs instead of emoji.
+- **Give the app its own icon**: don't ship the system default (`@android:drawable/sym_def_app_icon`).
+  Add `res/drawable/ic_launcher.xml` (a vector) and set `android:icon` (and `android:roundIcon`) in
+  the manifest; for an adaptive icon add `res/mipmap-anydpi-v26/ic_launcher.xml`. Before the first
+  build, ask the user how they want it: (1) they supply an image, or (2) you create it from the app's
+  idea. If the user doesn't care, create a simple one from the idea.
 
 ## 3. Build
 
