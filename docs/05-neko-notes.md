@@ -90,6 +90,9 @@ además encajan con la estética kawaii. `d8` no reporta ninguna clase faltante 
 - **Accesibilidad**: `contentDescription` en botones de icono (fijar, atrás, eliminar, cambiar
   vista, borrar búsqueda…) mediante `Modifier.semantics`.
 - **Estados vacíos** ilustrados en Inicio, Árbol de páginas y Bases de datos.
+- **Icono de lanzamiento adaptativo** (`res/mipmap-anydpi-v26/`): fondo degradado violeta→rosa y
+  cara de gatito kawaii dibujada como *vector*, con `<monochrome>` para los iconos temáticos de
+  Android 13+. (Antes usaba el icono por defecto del sistema.)
 
 ---
 
@@ -99,6 +102,10 @@ además encajan con la estética kawaii. `d8` no reporta ninguna clase faltante 
 examples/neko/
   AndroidManifest.xml                    package="com.buddyapps.neko" (label "Neko Notes")
   app.properties                         versionCode=1 versionName=1.0 minSdk=26 name=Neko Notes compose=true
+  res/drawable/ic_launcher_background.xml  fondo degradado (violeta → rosa)
+  res/drawable/ic_launcher_foreground.xml  gatito kawaii (cara)
+  res/mipmap-anydpi-v26/ic_launcher.xml    icono adaptativo (con <monochrome> para iconos temáticos)
+  res/mipmap-anydpi-v26/ic_launcher_round.xml
   java/com/buddyapps/neko/
     MainActivity.kt                      ComponentActivity → NekoApp()
     data/Note.kt                         Note, ChecklistItem, NoteFilter, ViewMode (+ JSON)

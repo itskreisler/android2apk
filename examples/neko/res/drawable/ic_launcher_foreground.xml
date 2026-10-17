@@ -1,0 +1,32 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Orejas -->
+    <path android:fillColor="#FFFFFF" android:pathData="M36,45 L31,21 L53,34 Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M72,45 L77,21 L55,34 Z" />
+
+    <!-- Cabeza -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M28,58 a26,26 0 1,1 52,0 a26,26 0 1,1 -52,0 Z" />
+
+    <!-- Mofletes -->
+    <path android:fillColor="#F59EBD" android:pathData="M40,65 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z" />
+    <path android:fillColor="#F59EBD" android:pathData="M68,65 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z" />
+
+    <!-- Ojos -->
+    <path android:fillColor="#292235" android:pathData="M45,55 m-4.5,0 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0 Z" />
+    <path android:fillColor="#292235" android:pathData="M63,55 m-4.5,0 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0 Z" />
+
+    <!-- Nariz -->
+    <path android:fillColor="#EC4899" android:pathData="M54,65 L50,61 L58,61 Z" />
+
+    <!-- Boca -->
+    <path android:fillColor="#00000000"
+        android:strokeColor="#292235"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:pathData="M54,65 L54,69 M54,69 C52,73 49,73 47,71 M54,69 C56,73 59,73 61,71" />
+</vector>
