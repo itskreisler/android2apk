@@ -26,39 +26,14 @@ import androidx.compose.ui.unit.dp
 import com.buddyapps.neko.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
 
-/** Pantalla honesta de "fase pendiente": nada de botones sin comportamiento. */
-@Composable
-fun PlaceholderScreen(emoji: String, title: String, subtitle: String, bullets: List<String>) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-    ) {
-        EmptyState(emoji = emoji, title = title, subtitle = subtitle)
-        Column(Modifier.fillMaxWidth().padding(horizontal = 32.dp)) {
-            Text(
-                text = "Llega en una fase siguiente:",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(8.dp))
-            bullets.forEach { b ->
-                Row(Modifier.padding(vertical = 3.dp)) {
-                    Text("•  ", color = MaterialTheme.colorScheme.primary)
-                    Text(b, style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
-        Spacer(Modifier.height(32.dp))
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilScreen(
     themeMode: ThemeMode,
     onThemeMode: (ThemeMode) -> Unit,
     noteCount: Int,
+    pageCount: Int,
+    databaseCount: Int,
     exportPath: String,
     onExport: suspend () -> String,
     onImport: suspend () -> Int,
@@ -76,13 +51,9 @@ fun PerfilScreen(
             NekoAvatar("Neko", size = 56)
             Spacer(Modifier.width(12.dp))
             Column {
+                Text("Neko Notes", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Text(
-                    text = "Neko Notes",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = "Fase 1 · $noteCount notas guardadas",
+                    "Fases 1–4 · $noteCount notas · $pageCount páginas · $databaseCount bases",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -114,7 +85,7 @@ fun PerfilScreen(
             onClick = {
                 scope.launch {
                     val n = onImport()
-                    onMessage(if (n == 0) "Nada que importar" else "Importadas $n notas")
+                    onMessage(if (n == 0) "Nada que importar" else "Importados $n elementos")
                 }
             },
             modifier = Modifier.fillMaxWidth(),

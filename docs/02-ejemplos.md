@@ -213,10 +213,14 @@ ejecutar; se ha hecho la versión **Compose nativa con persistencia JSON**.
 # → examples/neko/build/Neko-Notes-1.0-<abi>.apk
 ```
 
-- **Fase 1** (hecha): tema kawaii claro/oscuro, barra inferior de 4 destinos, Inicio tipo Keep
-  (buscador, filtros, cuadrícula/lista, tarjetas de color), editor de nota y de lista de tareas,
-  etiquetas, búsqueda local, y exportar/importar JSON.
-- **Fases 2–4** (pendientes): páginas y bloques estilo Notion, colecciones, calendario, bases de
-  datos y animaciones/transiciones compartidas.
+- **Fase 1**: tema kawaii claro/oscuro, barra inferior de 4 destinos, Inicio tipo Keep (buscador,
+  filtros, cuadrícula/lista, tarjetas de color), editor de nota y de lista de tareas, etiquetas,
+  búsqueda local, y exportar/importar JSON.
+- **Fase 2**: páginas anidadas y **editor de bloques** estilo Notion (texto, H1–H3, viñetas,
+  numerada, tareas, cita, separador, enlace, imagen, código), migas de pan y mover entre colecciones.
+- **Fase 3**: **colecciones** (icono/color), **calendario** mensual con fechas límite y **bases de
+  datos** locales (tabla/lista/tablero, propiedades, orden y filtros).
+- **Fase 4**: `SharedTransitionLayout` (tarjeta → editor), `AnimatedContent`, feedback háptico,
+  estado de carga, accesibilidad y estados vacíos.
 
 Por qué no hay Room/Hilt y qué se puede y no se puede verificar aquí: [05-neko-notes.md](05-neko-notes.md).

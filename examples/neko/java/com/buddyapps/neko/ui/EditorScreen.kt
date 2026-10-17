@@ -1,5 +1,7 @@
 package com.buddyapps.neko.ui
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,8 +49,7 @@ import com.buddyapps.neko.data.Note
 import com.buddyapps.neko.ui.theme.NoteCardColors
 
 /**
- * Editor de notas y listas de tareas (Fase 1).
- * Los bloques tipo Notion (encabezados, citas, código…) llegan en la Fase 2.
+ * Editor de notas y listas de tareas. Las páginas con bloques viven en PageEditorScreen.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,25 +58,43 @@ fun EditorScreen(
     onChange: (Note) -> Unit,
     onBack: () -> Unit,
     onDelete: () -> Unit,
+    shared: SharedTransitionScope? = null,
+    animated: AnimatedVisibilityScope? = null,
 ) {
     var tagDraft by remember { mutableStateOf("") }
+    var noteDate by remember { mutableStateOf(false) }
+    var itemDate by remember { mutableStateOf(-1) }
+
+    if (noteDate) {
+        DateDialog(
+            initial = note.dueDate,
+            onDismiss = { noteDate = false },
+            onConfirm = { onChange(note.copy(dueDate = it)); noteDate = false },
+        )
+    }
+    if (itemDate >= 0) {
+        DateDialog(
+            initial = note.items.getOrNull(itemDate)?.dueDate ?: 0,
+            onDismiss = { itemDate = -1 },
+            onConfirm = { millis ->
+                onChange(note.copy(items = note.items.replaceAt(itemDate) { it.copy(dueDate = millis) }))
+                itemDate = -1
+            },
+        )
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(if (note.isTaskList) "Lista de tareas" else "Nota") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Text("‹", fontSize = 30.sp) }
-                },
+                navigationIcon = { IconButton(onClick = onBack) { Text("‹", fontSize = 30.sp) } },
                 actions = {
                     IconButton(onClick = { onChange(note.copy(favorite = !note.favorite)) }) {
                         Text(if (note.favorite) "⭐" else "☆", fontSize = 20.sp)
                     }
                     IconButton(onClick = onDelete) { Text("🗑", fontSize = 18.sp) }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                ),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
         },
     ) { pad ->
@@ -84,9 +103,9 @@ fun EditorScreen(
                 .padding(pad)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .nekoSharedBounds(shared, animated, "note-${note.id}"),
         ) {
-            // Título grande, sin borde (estilo Notion)
             BasicTextField(
                 value = note.title,
                 onValueChange = { onChange(note.copy(title = it)) },
@@ -99,11 +118,7 @@ fun EditorScreen(
                 decorationBox = { inner ->
                     Box {
                         if (note.title.isEmpty()) {
-                            Text(
-                                text = "Título",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            Text("Título", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         inner()
                     }
@@ -112,24 +127,18 @@ fun EditorScreen(
             Spacer(Modifier.height(12.dp))
 
             if (note.isTaskList) {
-                TaskItems(note, onChange)
+                TaskItems(note, onChange) { itemDate = it }
             } else {
                 BasicTextField(
                     value = note.body,
                     onValueChange = { onChange(note.copy(body = it)) },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 180.dp),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     decorationBox = { inner ->
                         Box {
                             if (note.body.isEmpty()) {
-                                Text(
-                                    text = "Escribe algo bonito…",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                                Text("Escribe algo bonito…", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             inner()
                         }
@@ -139,9 +148,21 @@ fun EditorScreen(
 
             Spacer(Modifier.height(20.dp))
             TextButton(onClick = { onChange(convertType(note)) }) {
-                Text(
-                    if (note.isTaskList) "Convertir en nota" else "Convertir en lista de tareas",
-                )
+                Text(if (note.isTaskList) "Convertir en nota" else "Convertir en lista de tareas")
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Text("Fecha límite", style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (note.dueDate > 0) {
+                    PillTag("📅 ${formatDay(note.dueDate)}")
+                    TextButton(onClick = { onChange(note.copy(dueDate = 0)) }) { Text("Quitar") }
+                } else {
+                    TextButton(onClick = { onChange(note.copy(dueDate = startOfDay(System.currentTimeMillis()))) }) { Text("Hoy") }
+                    TextButton(onClick = { onChange(note.copy(dueDate = startOfDay(addDays(System.currentTimeMillis(), 1)))) }) { Text("Mañana") }
+                    TextButton(onClick = { noteDate = true }) { Text("Elegir…") }
+                }
             }
 
             Spacer(Modifier.height(12.dp))
@@ -160,18 +181,12 @@ fun EditorScreen(
                 onValueChange = { tagDraft = it },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 decorationBox = { inner ->
                     Box {
                         if (tagDraft.isEmpty()) {
-                            Text(
-                                text = "Nueva etiqueta + Enter",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            Text("Nueva etiqueta + Enter", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         inner()
                     }
@@ -181,9 +196,7 @@ fun EditorScreen(
             TextButton(
                 onClick = {
                     val t = tagDraft.trim().trimStart('#')
-                    if (t.isNotEmpty() && t !in note.tags) {
-                        onChange(note.copy(tags = note.tags + t))
-                    }
+                    if (t.isNotEmpty() && t !in note.tags) onChange(note.copy(tags = note.tags + t))
                     tagDraft = ""
                 },
             ) { Text("＋ Añadir etiqueta") }
@@ -194,7 +207,7 @@ fun EditorScreen(
 }
 
 @Composable
-private fun TaskItems(note: Note, onChange: (Note) -> Unit) {
+private fun TaskItems(note: Note, onChange: (Note) -> Unit, onPickDate: (Int) -> Unit) {
     note.items.forEachIndexed { index, item ->
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Checkbox(
@@ -205,23 +218,22 @@ private fun TaskItems(note: Note, onChange: (Note) -> Unit) {
                 value = item.text,
                 onValueChange = { v -> onChange(note.copy(items = note.items.replaceAt(index) { it.copy(text = v) })) },
                 modifier = Modifier.weight(1f).padding(vertical = 12.dp),
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 decorationBox = { inner ->
                     Box {
                         if (item.text.isEmpty()) {
-                            Text(
-                                text = "Elemento ${index + 1}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            Text("Elemento ${index + 1}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         inner()
                     }
                 },
             )
+            if (item.dueDate > 0) {
+                TextButton(onClick = { onPickDate(index) }) { Text("📅", fontSize = 14.sp) }
+            } else {
+                IconButton(onClick = { onPickDate(index) }) { Text("📅", fontSize = 14.sp) }
+            }
             IconButton(onClick = { onChange(note.copy(items = note.items.filterIndexed { i, _ -> i != index })) }) {
                 Text("✕", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -245,11 +257,7 @@ private fun ColorPicker(current: Long, onPick: (Long) -> Unit) {
                     .background(Color(c))
                     .border(
                         width = if (selected) 3.dp else 1.dp,
-                        color = if (selected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.outlineVariant
-                        },
+                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
                         shape = CircleShape,
                     )
                     .clickable { onPick(c) },
@@ -261,17 +269,10 @@ private fun ColorPicker(current: Long, onPick: (Long) -> Unit) {
 @Composable
 private fun TagRow(tags: List<String>, onChange: (List<String>) -> Unit) {
     if (tags.isEmpty()) {
-        Text(
-            text = "Sin etiquetas todavía",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Text("Sin etiquetas todavía", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         tags.forEach { tag ->
             Row(
                 modifier = Modifier
@@ -281,11 +282,7 @@ private fun TagRow(tags: List<String>, onChange: (List<String>) -> Unit) {
                     .padding(horizontal = 10.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = "#$tag",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Text("#$tag", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.width(6.dp))
                 Text("✕", style = MaterialTheme.typography.labelSmall)
             }
@@ -297,14 +294,12 @@ private fun List<ChecklistItem>.replaceAt(index: Int, block: (ChecklistItem) -> 
     mapIndexed { i, item -> if (i == index) block(item) else item }
 
 private fun convertType(note: Note): Note = if (note.isTaskList) {
-    // lista → nota: vuelca los elementos en el cuerpo
     note.copy(
         isTaskList = false,
         body = note.body.ifBlank { note.items.joinToString("\n") { it.text } },
         items = emptyList(),
     )
 } else {
-    // nota → lista: una casilla por línea no vacía
     val lines = note.body.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
     note.copy(
         isTaskList = true,

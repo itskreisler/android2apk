@@ -1,5 +1,8 @@
 package com.buddyapps.neko.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +29,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,45 +50,53 @@ fun HomeScreen(
     onOpen: (String) -> Unit,
     onToggleFavorite: (String) -> Unit,
     onToggleItem: (String, Int) -> Unit,
+    shared: SharedTransitionScope? = null,
+    animated: AnimatedVisibilityScope? = null,
 ) {
     val visible = remember(notes, query, filter) { filterNotes(notes, query, filter) }
     val favorites = visible.filter { it.favorite }
     val others = visible.filterNot { it.favorite }
 
-    LazyVerticalGrid(
-        columns = if (viewMode == ViewMode.GRID) GridCells.Adaptive(150.dp) else GridCells.Fixed(1),
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        item(span = { GridItemSpan(maxLineSpan) }) { WelcomeHeader() }
-        item(span = { GridItemSpan(maxLineSpan) }) { SearchField(query, onQueryChange) }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            FilterRow(filter, onFilterChange, viewMode, onViewModeChange)
-        }
+    AnimatedContent(targetState = viewMode, label = "viewMode") { mode ->
+        LazyVerticalGrid(
+            columns = if (mode == ViewMode.GRID) GridCells.Adaptive(150.dp) else GridCells.Fixed(1),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item(span = { GridItemSpan(maxLineSpan) }) { WelcomeHeader() }
+            item(span = { GridItemSpan(maxLineSpan) }) { SearchField(query, onQueryChange) }
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                FilterRow(filter, onFilterChange, viewMode, onViewModeChange)
+            }
 
-        if (visible.isEmpty()) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                EmptyState(
-                    emoji = if (query.isBlank()) "🐱" else "🐾",
-                    title = if (query.isBlank()) "Neko está esperando" else "Sin resultados",
-                    subtitle = if (query.isBlank()) {
-                        "Crea tu primera nota con el botón ＋"
-                    } else {
-                        "Prueba con otra palabra o cambia el filtro"
-                    },
-                )
+            if (visible.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    EmptyState(
+                        emoji = if (query.isBlank()) "🐱" else "🐾",
+                        title = if (query.isBlank()) "Neko está esperando" else "Sin resultados",
+                        subtitle = if (query.isBlank()) {
+                            "Crea tu primera nota con el botón ＋"
+                        } else {
+                            "Prueba con otra palabra o cambia el filtro"
+                        },
+                    )
+                }
+            } else {
+                if (favorites.isNotEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader("Fijadas") }
+                    items(favorites, key = { it.id }) { note ->
+                        CardFor(note, onOpen, onToggleFavorite, onToggleItem, shared, animated)
+                    }
+                }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    SectionHeader(if (favorites.isEmpty()) "Recientes" else "Todas")
+                }
+                items(others, key = { it.id }) { note ->
+                    CardFor(note, onOpen, onToggleFavorite, onToggleItem, shared, animated)
+                }
             }
-        } else {
-            if (favorites.isNotEmpty()) {
-                item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader("Fijadas") }
-                items(favorites, key = { it.id }) { note -> CardFor(note, onOpen, onToggleFavorite, onToggleItem) }
-            }
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                SectionHeader(if (favorites.isEmpty()) "Recientes" else "Todas")
-            }
-            items(others, key = { it.id }) { note -> CardFor(note, onOpen, onToggleFavorite, onToggleItem) }
         }
     }
 }
@@ -94,12 +107,16 @@ private fun CardFor(
     onOpen: (String) -> Unit,
     onToggleFavorite: (String) -> Unit,
     onToggleItem: (String, Int) -> Unit,
+    shared: SharedTransitionScope?,
+    animated: AnimatedVisibilityScope?,
 ) {
     NoteCard(
         note = note,
         onClick = { onOpen(note.id) },
         onToggleFavorite = { onToggleFavorite(note.id) },
         onToggleItem = { onToggleItem(note.id, it) },
+        shared = shared,
+        animated = animated,
     )
 }
 
@@ -152,7 +169,10 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         leadingIcon = { Text("🔍") },
         trailingIcon = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) { Text("✕") }
+                IconButton(
+                    onClick = { onQueryChange("") },
+                    modifier = Modifier.semantics { contentDescription = "Borrar búsqueda" },
+                ) { Text("✕") }
             }
         },
         singleLine = true,
@@ -197,6 +217,9 @@ private fun FilterRow(
         IconButton(
             onClick = {
                 onViewModeChange(if (viewMode == ViewMode.GRID) ViewMode.LIST else ViewMode.GRID)
+            },
+            modifier = Modifier.semantics {
+                contentDescription = if (viewMode == ViewMode.GRID) "Ver como lista" else "Ver como cuadrícula"
             },
         ) {
             Text(if (viewMode == ViewMode.GRID) "▦" else "☰", fontSize = 20.sp)

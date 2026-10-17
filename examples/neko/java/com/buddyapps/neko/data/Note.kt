@@ -7,17 +7,22 @@ import org.json.JSONObject
 data class ChecklistItem(
     val text: String,
     val done: Boolean = false,
+    val dueDate: Long = 0,
 ) {
-    fun toJson(): JSONObject = JSONObject().put("text", text).put("done", done)
+    fun toJson(): JSONObject = JSONObject().put("text", text).put("done", done).put("dueDate", dueDate)
 
     companion object {
-        fun fromJson(o: JSONObject) = ChecklistItem(o.optString("text"), o.optBoolean("done"))
+        fun fromJson(o: JSONObject) = ChecklistItem(
+            o.optString("text"),
+            o.optBoolean("done"),
+            o.optLong("dueDate", 0),
+        )
     }
 }
 
 /**
- * Una nota. Sirve para los tres tipos del MVP: nota rápida (body), lista de tareas
- * (isTaskList + items). Los bloques de "página" llegan en una fase posterior.
+ * Una nota. Sirve para los tipos del MVP: nota rápida (body) y lista de tareas
+ * (isTaskList + items). Las páginas con bloques viven en [Page].
  */
 data class Note(
     val id: String,
@@ -29,6 +34,7 @@ data class Note(
     val archived: Boolean = false,
     val isTaskList: Boolean = false,
     val items: List<ChecklistItem> = emptyList(),
+    val dueDate: Long = 0,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
 ) {
@@ -48,6 +54,7 @@ data class Note(
         .put("archived", archived)
         .put("isTaskList", isTaskList)
         .put("items", JSONArray().apply { items.forEach { put(it.toJson()) } })
+        .put("dueDate", dueDate)
         .put("createdAt", createdAt)
         .put("updatedAt", updatedAt)
 
@@ -69,6 +76,7 @@ data class Note(
                 archived = o.optBoolean("archived"),
                 isTaskList = o.optBoolean("isTaskList"),
                 items = items,
+                dueDate = o.optLong("dueDate", 0),
                 createdAt = o.optLong("createdAt"),
                 updatedAt = o.optLong("updatedAt"),
             )
