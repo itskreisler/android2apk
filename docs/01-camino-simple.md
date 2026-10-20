@@ -12,8 +12,9 @@ emulador), este no es el sitio: mira la nota al final.
 
 ```sh
 pkg install proot-distro        # en Termux (una vez)
-pd install -n alpine https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/aarch64/alpine-minirootfs-3.24.2-aarch64.tar.gz
-pd login alpine --user root --shared-tmp
+CONTAINER="alpine-$(date +%d-%b-%Y-%H-%M-%S)"
+pd install -n "$CONTAINER" https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/aarch64/alpine-minirootfs-3.24.2-aarch64.tar.gz
+pd login "$CONTAINER" --user root --shared-tmp
 ```
 
 - `pd` es el alias de `proot-distro`.
