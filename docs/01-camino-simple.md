@@ -131,17 +131,18 @@ Sigue en **[02-ejemplos.md](02-ejemplos.md)**.
 
 ## Instalar el APK en el teléfono (opcional)
 
-Aquí no hay Android: el APK es solo un archivo. Para instalarlo, cópialo al teléfono, o sírvelo
-localmente y deja que Klei lo instale con su herramienta `install_apk`:
+Aquí no hay Android: el APK es solo un archivo. Para instalarlo, cópialo al almacenamiento
+compartido del teléfono:
 
 ```sh
-python3 -m http.server 8080 --directory examples/hello/build
-# luego pídele a Klei: install_apk http://127.0.0.1:8080/app.apk
+cp examples/hello/build/app.apk /data/data/com.termux/files/home/storage/shared/
+# si estás dentro de Alpine vía proot-distro, el mismo sitio es /sdcard:
+# cp examples/hello/build/app.apk /sdcard/
 ```
 
-El instalador de Android y Play Protect ignoran los toques de apps de accesibilidad, así que **el
-usuario tiene que pulsar Instalar/Actualizar** (a menudo con huella). Después, abre la app y comprueba
-que funciona.
+Ábrelo desde un gestor de archivos (o Descargas) y **pulsa Instalar/Actualizar**: el instalador
+de Android y Play Protect ignoran los toques de apps de accesibilidad, así que tienes que
+confirmarlo tú (a menudo con huella). Después, abre la app y comprueba que funciona.
 
 ## ¿Y si quiero algo más profesional?
 

@@ -3,11 +3,8 @@
 Compilar un **APK Android firmado desde Java (o Kotlin) plano, dentro de Alpine Linux** — sin
 Gradle, sin Android Studio y sin PC. Solo `aapt2` → `javac`/`kotlinc` → `d8` → zip + align → `apksigner`.
 
-Es el pipeline de build *on-device* que usa **Klei**, ejecutado **directamente en una shell Alpine**.
-Klei normalmente lo corre dentro de un Alpine
-embebido (vía [proot](https://proot-me.github.io/), porque Android solo deja ejecutar binarios desde
-la carpeta nativa del APK); dentro de Alpine ese andamiaje no hace falta, así que llamamos a los
-scripts directamente.
+Este repo es una **guía** con las herramientas (scripts de setup, build y lint) para **crear y
+compilar APKs** en una shell Alpine, sin dependencias externas.
 
 ## Pipeline
 

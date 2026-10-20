@@ -101,12 +101,14 @@ ships `.so` files; `NATIVE_ABIS` in `setup-compose.sh` controls which ones are p
 
 ## 4. Install (the user taps the final button)
 
-Android's installer and Play Protect dialogs ignore taps from accessibility apps, so you can open
-the installer but **the user has to tap Install/Update and confirm (often with a fingerprint)**.
+Copy the built APK to the phone's shared storage:
 
-1. Copy the APK to the phone (or serve it): `python3 -m http.server 8080 --directory <app-dir>/build`.
-2. Ask Klei to install it: `install_apk` with the APK path inside Klei's Linux, or the local URL
-   `http://127.0.0.1:8080/app.apk`.
-3. Call `wait_for_install` with the package name (and `min_version_code` for an update). Do not tap
-   Install yourself; never claim you did, and never write your own shell polling loop.
-4. Open the new app and check it works, then report what you built.
+```sh
+cp <app-dir>/build/app.apk /data/data/com.termux/files/home/storage/shared/
+# inside proot-distro Alpine the same place is /sdcard:
+# cp <app-dir>/build/app.apk /sdcard/
+```
+
+Android's installer and Play Protect dialogs ignore taps from accessibility apps, so **the user
+has to open the APK from a file manager and tap Install/Update** (often confirming with a
+fingerprint). After that, open the new app and check it works, then report what you built.
